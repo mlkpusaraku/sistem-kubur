@@ -99,13 +99,17 @@ function displayRows(rows){
 }
 
 function filterTable(){
-    const q=document.getElementById("searchBox").value.toLowerCase().trim();
-    const f=document.getElementById("filterDaerah").value;
+    const q = document.getElementById("searchBox").value.toLowerCase().trim();
+    const f = document.getElementById("filterDaerah").value;
+
     const filtered = allRows.filter(r=>{
+        // search hanya pada Nama Si Mati
         const matchNama = r.nama.toLowerCase().includes(q);
-        const matchDaerah = f==="" || r.daerah===f;
+        // filter daerah
+        const matchDaerah = f==="" || r.daerah === f;
         return matchNama && matchDaerah;
     });
+
     displayRows(filtered);
 }
 
