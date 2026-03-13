@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carian Maklumat Kubur</title>
+
+<style>
+body{font-family:Arial; background:#f2f2f2; padding:10px;}
+.container{max-width:1200px; margin:auto; background:#fff; padding:10px; border-radius:10px;}
+h1{text-align:center; font-size:16px;}
+#searchBox,#filterDaerah{width:100%; padding:8px; margin-bottom:8px; font-size:12px;}
+button{padding:6px 12px; background:#555; color:white; border:none; cursor:pointer;}
+table{width:100%; border-collapse:collapse; font-size:11px;}
+th,td{padding:5px; border-bottom:1px solid #ddd;}
+th{background:#555; color:white;}
+tr:hover{background:#f1f1f1;}
+.disclaimer{font-size:10px; text-align:center; margin-top:5px;}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Carian Maklumat Kubur</h1>
+
+<select id="filterDaerah">
+<option value="">-- Pilih Daerah --</option>
+<option value="Melaka Tengah">Melaka Tengah</option>
+<option value="Alor Gajah">Alor Gajah</option>
+<option value="Jasin">Jasin</option>
+</select>
+
+<input type="text" id="searchBox" placeholder="Cari Nama Si Mati">
+<button onclick="filterTable()">Cari</button>
+
+<table id="kuburTable">
+<thead>
+<tr>
+<th>Nama Si Mati</th>
+<th>Nombor Kubur</th>
+<th>Baris</th>
+<th>Tarikh Kematian</th>
+<th>Umur</th>
+<th>Daerah</th>
+<th>Nama Tanah Perkuburan</th>
+<th>Lokasi</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="disclaimer">
+Maklumat mungkin tidak lengkap atau tepat sepenuhnya.
+</div>
+</div>
+
+<script>
+const csvUrl = "kubur.csv"; // CSV awak nanti letak nama ni
+
+const tableBody = document.querySelector("#kuburTable tbody");
+let allRows = [];
+
+async function loadCSV() {
+    const response = await fetch(csvUrl);
+    const data = await response.text();
+    const rows = data.split("\n");
+
+    rows.forEach((row,index)=>{
+        if(index===0) return; // skip header
+        const cols=row.split(",");
+        if(cols[0]){
+            const obj={
+                nama: cols[0].trim(),
+                kubur: cols[1] ? cols[1].trim() : "",
+                baris: cols[2] ? cols[2].trim() : "",
+                tarikh: cols[3] ? cols[3].trim() : "",
+                umur: cols[4] ? cols[4].trim() : "",
+                daerah: cols[5] ? cols[5].trim() : "",
+                tanah: cols[6] ? cols[6].trim() : "",
+                lokasi: cols[7] ? cols[7].trim() : ""
+            };
+            allRows.push(obj);
+        }
+    });
+    displayRows(allRows);
+}
+
+function displayRows(rows){
+    tableBody.innerHTML="";
+    rows.forEach(r=>{
+        const tr=document.createElement("tr");
+        [r.nama,r.kubur,r.baris,r.tarikh,r.umur,r.daerah,r.tanah,r.lokasi].forEach(t=>{
+            const td=document.createElement("td");
+            td.textContent=t;
+            tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+    });
+}
+
+function filterTable(){
+    const q=document.getElementById("searchBox").value.toLowerCase().trim();
+    const f=document.getElementById("filterDaerah").value;
+    const filtered = allRows.filter(r=>{
+        const matchNama = r.nama.toLowerCase().includes(q);
+        const matchDaerah = f==="" || r.daerah===f;
+        return matchNama && matchDaerah;
+    });
+    displayRows(filtered);
+}
+
+loadCSV();
+</script>
+
+</body>
+</html>
