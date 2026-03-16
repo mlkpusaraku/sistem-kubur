@@ -11,10 +11,12 @@ body {
   font-family: Arial, sans-serif;
   margin: 20px;
   background-color: #f4f4f4;
+  font-size: 14px; /* tulisan lebih kecil */
 }
 h1 {
   text-align: center;
   color: #222;
+  font-size: 20px; /* lebih kecil */
 }
 .controls {
   margin: 10px 0;
@@ -23,20 +25,21 @@ h1 {
   gap: 10px;
 }
 select, input {
-  padding: 6px 10px;
-  font-size: 16px;
+  padding: 5px 8px;
+  font-size: 14px; /* kecilkan */
   flex: 1;
-  min-width: 200px;
+  min-width: 180px;
 }
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
+  margin-top: 10px;
   background: #fff;
+  font-size: 13px; /* kecilkan */
 }
 th, td {
   border: 1px solid #aaa;
-  padding: 8px;
+  padding: 6px 8px;
   text-align: left;
 }
 th {
@@ -64,7 +67,7 @@ a:hover {
     top: auto;
   }
   tr {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
   td {
     text-align: right;
@@ -130,7 +133,7 @@ Papa.parse(csvUrl, {
 // Populate dropdown Daerah auto
 function populateDaerahDropdown() {
   const select = document.getElementById('daerahSelect');
-  const daerahSet = new Set(kuburData.map(r => r["DAERAH"]).filter(d => d));
+  const daerahSet = new Set(kuburData.map(r => (r["DAERAH"] || "").trim()).filter(d => d));
   daerahSet.forEach(d => {
     const option = document.createElement('option');
     option.value = d;
@@ -148,15 +151,15 @@ function displayTable(data) {
     ["NAMA SI MATI","NAMA TAPAK KUBUR","NOMBOR KUBUR","BARIS / LAJUR","TARIKH KEMATIAN","UMUR","LOKASI","DAERAH"].forEach(col => {
       const td = document.createElement('td');
       td.setAttribute("data-label", col);
-      if(col === "LOKASI" && row[col]) {
-        // Buat link Google Maps
+      const value = (row[col] || "").trim();
+      if(col === "LOKASI" && value) {
         const a = document.createElement('a');
-        a.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(row[col])}`;
-        a.textContent = row[col];
+        a.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}`;
+        a.textContent = value;
         a.target = "_blank";
         td.appendChild(a);
       } else {
-        td.textContent = row[col] || "";
+        td.textContent = value;
       }
       tr.appendChild(td);
     });
@@ -164,17 +167,22 @@ function displayTable(data) {
   });
 }
 
-// Filter function
+// Filter function dengan partial search
 function filterKubur() {
-  const daerah = document.getElementById('daerahSelect').value.toLowerCase();
-  const search = document.getElementById('searchInput').value.toLowerCase();
+  const daerah = document.getElementById('daerahSelect').value.trim().toLowerCase();
+  const search = document.getElementById('searchInput').value.trim().toLowerCase();
 
   const filtered = kuburData.filter(row => {
-    const matchDaerah = !daerah || (row["DAERAH"] && row["DAERAH"].toLowerCase() === daerah);
-    const matchSearch = (row["NAMA SI MATI"] && row["NAMA SI MATI"].toLowerCase().includes(search)) ||
-                        (row["NAMA TAPAK KUBUR"] && row["NAMA TAPAK KUBUR"].toLowerCase().includes(search));
+    const rowDaerah = (row["DAERAH"] || "").trim().toLowerCase();
+    const rowNama = (row["NAMA SI MATI"] || "").trim().toLowerCase();
+    const rowTapak = (row["NAMA TAPAK KUBUR"] || "").trim().toLowerCase();
+
+    const matchDaerah = !daerah || rowDaerah === daerah;
+    const matchSearch = !search || rowNama.includes(search) || rowTapak.includes(search);
+
     return matchDaerah && matchSearch;
   });
+
   displayTable(filtered);
 }
 </script>
