@@ -46,9 +46,6 @@
 <label for="daerahSelect">Pilih Daerah:</label>
 <select id="daerahSelect" onchange="filterKubur()">
   <option value="">-- Semua Daerah --</option>
-  <option value="Melaka Tengah">Melaka Tengah</option>
-  <option value="Alor Gajah">Alor Gajah</option>
-  <option value="Jasin">Jasin</option>
 </select>
 
 <label for="searchInput">Carian Nama Tapak Kubur / Nama Si Mati:</label>
@@ -57,63 +54,74 @@
 <table id="kuburTable">
   <thead>
     <tr>
-      <th>Nama Tapak Kubur</th>
-      <th>Nombor Kubur</th>
-      <th>Nama Si Mati</th>
-      <th>Tarikh Kematian</th>
-      <th>Daerah</th>
+      <th>NAMA SI MATI</th>
+      <th>NAMA TAPAK KUBUR</th>
+      <th>NOMBOR KUBUR</th>
+      <th>BARIS / LAJUR</th>
+      <th>TARIKH KEMATIAN</th>
+      <th>UMUR</th>
+      <th>LOKASI</th>
+      <th>DAERAH</th>
     </tr>
   </thead>
   <tbody>
-    <!-- Contoh data, ganti ikut data dari Google Sheets -->
-    <tr>
-      <td>Tapak A</td>
-      <td>001</td>
-      <td>Ali</td>
-      <td>01/01/2020</td>
-      <td>Melaka Tengah</td>
-    </tr>
-    <tr>
-      <td>Tapak B</td>
-      <td>002</td>
-      <td>Abu</td>
-      <td>02/02/2021</td>
-      <td>Jasin</td>
-    </tr>
-    <tr>
-      <td>Tapak C</td>
-      <td>003</td>
-      <td>Siti</td>
-      <td>15/03/2022</td>
-      <td>Alor Gajah</td>
-    </tr>
-    <!-- Tambah baris lain ikut database sebenar -->
+    <!-- Data akan generate dari CSV -->
   </tbody>
 </table>
 
 <script>
-function filterKubur() {
-  var daerah = document.getElementById('daerahSelect').value.toLowerCase();
-  var search = document.getElementById('searchInput').value.toLowerCase();
-  var table = document.getElementById('kuburTable');
-  var tr = table.getElementsByTagName('tr');
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSs2iLNoW3nhQ7jxhzKAPbev6UPK99anfHiE7s6A9YP8Gg4cgVlKSq1Ycu3VDSe-PggQx26Z-QzG9V_/pub?gid=2066831020&single=true&output=csv";
 
-  for (var i = 1; i < tr.length; i++) { // skip header
-    var tdDaerah = tr[i].getElementsByTagName('td')[4];
-    var tdNamaTapak = tr[i].getElementsByTagName('td')[0];
-    var tdNamaMati = tr[i].getElementsByTagName('td')[2];
+let kuburData = [];
 
-    var matchDaerah = tdDaerah && (daerah === "" || tdDaerah.textContent.toLowerCase() === daerah);
-    var matchSearch = (tdNamaTapak && tdNamaTapak.textContent.toLowerCase().includes(search)) ||
-                      (tdNamaMati && tdNamaMati.textContent.toLowerCase().includes(search));
-
-    if (matchDaerah && matchSearch) {
-      tr[i].style.display = "";
-    } else {
-      tr[i].style.display = "none";
-    }
-  }
+async function loadCSV() {
+  const res = await fetch(csvUrl);
+  const data = await res.text();
+  const rows = data.split("\n").slice(1); // skip header
+  kuburData = rows.map(r => r.split(","));
+  populateDaerahDropdown();
+  displayTable(kuburData);
 }
+
+function populateDaerahDropdown() {
+  const select = document.getElementById('daerahSelect');
+  const daerahSet = new Set(kuburData.map(r => r[7]).filter(d => d)); // lajur 8 = Daerah
+  daerahSet.forEach(d => {
+    const option = document.createElement('option');
+    option.value = d;
+    option.textContent = d;
+    select.appendChild(option);
+  });
+}
+
+function displayTable(data) {
+  const tbody = document.querySelector("#kuburTable tbody");
+  tbody.innerHTML = "";
+  data.forEach(row => {
+    const tr = document.createElement('tr');
+    row.forEach(cell => {
+      const td = document.createElement('td');
+      td.textContent = cell;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function filterKubur() {
+  const daerah = document.getElementById('daerahSelect').value.toLowerCase();
+  const search = document.getElementById('searchInput').value.toLowerCase();
+
+  const filtered = kuburData.filter(row => {
+    const matchDaerah = !daerah || (row[7] && row[7].toLowerCase() === daerah);
+    const matchSearch = (row[0] && row[0].toLowerCase().includes(search)) || 
+                        (row[1] && row[1].toLowerCase().includes(search));
+    return matchDaerah && matchSearch;
+  });
+  displayTable(filtered);
+}
+
+loadCSV();
 </script>
 
 </body>
