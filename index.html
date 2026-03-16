@@ -1,149 +1,119 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-<meta charset="UTF-8">
-<title>Sistem Carian Kubur</title>
-
-<style>
-body{
-font-family:Arial;
-background:#f2f2f2;
-padding:20px;
-}
-
-.container{
-max-width:1200px;
-margin:auto;
-background:white;
-padding:15px;
-border-radius:8px;
-}
-
-h1{
-text-align:center;
-}
-
-input{
-width:100%;
-padding:10px;
-margin-bottom:10px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-th,td{
-border:1px solid #ddd;
-padding:8px;
-font-size:12px;
-}
-
-th{
-background:#444;
-color:white;
-}
-
-tr:hover{
-background:#f1f1f1;
-}
-</style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carian Maklumat Kubur</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    select, input {
+      padding: 6px 10px;
+      margin: 5px 0;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: #fff;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #333;
+      color: #fff;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
+<h1>Carian Maklumat Kubur</h1>
 
-<h1>Sistem Carian Kubur</h1>
+<label for="daerahSelect">Pilih Daerah:</label>
+<select id="daerahSelect" onchange="filterKubur()">
+  <option value="">-- Semua Daerah --</option>
+  <option value="Melaka Tengah">Melaka Tengah</option>
+  <option value="Alor Gajah">Alor Gajah</option>
+  <option value="Jasin">Jasin</option>
+</select>
 
-<input type="text" id="search" placeholder="Taip Nama Si Mati">
+<label for="searchInput">Carian Nama Tapak Kubur / Nama Si Mati:</label>
+<input type="text" id="searchInput" onkeyup="filterKubur()" placeholder="Taip nama...">
 
-<table id="table">
-<thead>
-<tr>
-<th>Nama Si Mati</th>
-<th>No Kubur</th>
-<th>Baris</th>
-<th>Tarikh Kematian</th>
-<th>Umur</th>
-<th>Daerah</th>
-<th>Tanah Perkuburan</th>
-</tr>
-</thead>
-
-<tbody></tbody>
-
+<table id="kuburTable">
+  <thead>
+    <tr>
+      <th>Nama Tapak Kubur</th>
+      <th>Nombor Kubur</th>
+      <th>Nama Si Mati</th>
+      <th>Tarikh Kematian</th>
+      <th>Daerah</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Contoh data, ganti ikut data dari Google Sheets -->
+    <tr>
+      <td>Tapak A</td>
+      <td>001</td>
+      <td>Ali</td>
+      <td>01/01/2020</td>
+      <td>Melaka Tengah</td>
+    </tr>
+    <tr>
+      <td>Tapak B</td>
+      <td>002</td>
+      <td>Abu</td>
+      <td>02/02/2021</td>
+      <td>Jasin</td>
+    </tr>
+    <tr>
+      <td>Tapak C</td>
+      <td>003</td>
+      <td>Siti</td>
+      <td>15/03/2022</td>
+      <td>Alor Gajah</td>
+    </tr>
+    <!-- Tambah baris lain ikut database sebenar -->
+  </tbody>
 </table>
 
-</div>
-
 <script>
+function filterKubur() {
+  var daerah = document.getElementById('daerahSelect').value.toLowerCase();
+  var search = document.getElementById('searchInput').value.toLowerCase();
+  var table = document.getElementById('kuburTable');
+  var tr = table.getElementsByTagName('tr');
 
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSs2iLNoW3nhQ7jxhzKAPbev6UPK99anfHiE7s6A9YP8Gg4cgVlKSq1Ycu3VDSe-PggQx26Z-QzG9V_/pubhtml?gid=2066831020&single=true";
+  for (var i = 1; i < tr.length; i++) { // skip header
+    var tdDaerah = tr[i].getElementsByTagName('td')[4];
+    var tdNamaTapak = tr[i].getElementsByTagName('td')[0];
+    var tdNamaMati = tr[i].getElementsByTagName('td')[2];
 
-let dataKubur=[];
+    var matchDaerah = tdDaerah && (daerah === "" || tdDaerah.textContent.toLowerCase() === daerah);
+    var matchSearch = (tdNamaTapak && tdNamaTapak.textContent.toLowerCase().includes(search)) ||
+                      (tdNamaMati && tdNamaMati.textContent.toLowerCase().includes(search));
 
-fetch(sheetURL)
-.then(res=>res.text())
-.then(data=>{
-
-let rows=data.split("\n");
-
-rows.forEach((row,i)=>{
-
-if(i < 4) return;
-
-let col=row.split(",");
-
-if(col[0]){
-
-dataKubur.push(col);
-
+    if (matchDaerah && matchSearch) {
+      tr[i].style.display = "";
+    } else {
+      tr[i].style.display = "none";
+    }
+  }
 }
-
-});
-
-papar(dataKubur);
-
-});
-
-function papar(data){
-
-let tbody=document.querySelector("#table tbody");
-
-tbody.innerHTML="";
-
-data.forEach(r=>{
-
-let tr=document.createElement("tr");
-
-r.slice(0,7).forEach(c=>{
-
-let td=document.createElement("td");
-
-td.innerText=c;
-
-tr.appendChild(td);
-
-});
-
-tbody.appendChild(tr);
-
-});
-
-}
-
-document.getElementById("search").addEventListener("keyup",function(){
-
-let keyword=this.value.toLowerCase();
-
-let result=dataKubur.filter(r=>r[0].toLowerCase().includes(keyword));
-
-papar(result);
-
-});
-
 </script>
 
 </body>
