@@ -1,55 +1,150 @@
-const tableBody = document.querySelector("#kuburTable tbody");
-let allRows = [];
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<title>Sistem Carian Kubur</title>
 
-async function loadCSV() {
-    const response = await fetch(csvUrl);
-    const data = await response.text();
-    const rows = data.split("\n");
-
-    rows.forEach((row,index)=>{
-        if(index===0) return; // skip header
-        const cols = row.split(",");
-        if(cols[0]){
-            const obj = {
-                nama: cols[0].trim(),
-                kubur: cols[1] ? cols[1].trim() : "",
-                baris: cols[2] ? cols[2].trim() : "",
-                tarikh: cols[3] ? cols[3].trim() : "",
-                umur: cols[4] ? cols[4].trim() : "",
-                daerah: cols[5] ? cols[5].trim() : "",
-                tanah: cols[6] ? cols[6].trim() : "",
-                lokasi: cols[7] ? cols[7].trim() : ""
-            };
-            allRows.push(obj);
-        }
-    });
-    displayRows(allRows);
+<style>
+body{
+font-family:Arial;
+background:#f2f2f2;
+padding:20px;
 }
 
-function displayRows(rows){
-    tableBody.innerHTML = "";
-    rows.forEach(r=>{
-        const tr = document.createElement("tr");
-        [r.nama,r.kubur,r.baris,r.tarikh,r.umur,r.daerah,r.tanah,r.lokasi].forEach(t=>{
-            const td = document.createElement("td");
-            td.textContent = t;
-            tr.appendChild(td);
-        });
-        tableBody.appendChild(tr);
-    });
+.container{
+max-width:1200px;
+margin:auto;
+background:white;
+padding:15px;
+border-radius:8px;
 }
 
-function filterTable(){
-    const q = document.getElementById("searchBox").value.toLowerCase().trim();
-    const f = document.getElementById("filterDaerah").value;
-
-    const filtered = allRows.filter(r=>{
-        const matchNama = r.nama.toLowerCase().includes(q);
-        const matchDaerah = f === "" || r.daerah === f;
-        return matchNama && matchDaerah;
-    });
-
-    displayRows(filtered);
+h1{
+text-align:center;
 }
 
-loadCSV();
+input{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:8px;
+font-size:12px;
+}
+
+th{
+background:#444;
+color:white;
+}
+
+tr:hover{
+background:#f1f1f1;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Sistem Carian Kubur</h1>
+
+<input type="text" id="search" placeholder="Taip Nama Si Mati">
+
+<table id="table">
+<thead>
+<tr>
+<th>Nama Si Mati</th>
+<th>No Kubur</th>
+<th>Baris</th>
+<th>Tarikh Kematian</th>
+<th>Umur</th>
+<th>Daerah</th>
+<th>Tanah Perkuburan</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSs2iLNoW3nhQ7jxhzKAPbev6UPK99anfHiE7s6A9YP8Gg4cgVlKSq1Ycu3VDSe-PggQx26Z-QzG9V_/pub?output=csv";
+
+let dataKubur=[];
+
+fetch(sheetURL)
+.then(res=>res.text())
+.then(data=>{
+
+let rows=data.split("\n");
+
+rows.forEach((row,i)=>{
+
+if(i===0) return;
+
+let col=row.split(",");
+
+if(col[0]){
+
+dataKubur.push(col);
+
+}
+
+});
+
+papar(dataKubur);
+
+});
+
+function papar(data){
+
+let tbody=document.querySelector("#table tbody");
+
+tbody.innerHTML="";
+
+data.forEach(r=>{
+
+let tr=document.createElement("tr");
+
+r.slice(0,7).forEach(c=>{
+
+let td=document.createElement("td");
+
+td.innerText=c;
+
+tr.appendChild(td);
+
+});
+
+tbody.appendChild(tr);
+
+});
+
+}
+
+document.getElementById("search").addEventListener("keyup",function(){
+
+let keyword=this.value.toLowerCase();
+
+let result=dataKubur.filter(r=>r[0].toLowerCase().includes(keyword));
+
+papar(result);
+
+});
+
+</script>
+
+</body>
+</html>
