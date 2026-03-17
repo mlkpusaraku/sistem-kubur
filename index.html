@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta charset="UTF-8">
 <title>Carian Maklumat Kubur Negeri Melaka</title>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <style>
 
@@ -42,19 +48,9 @@ margin:20px auto;
 background:white;
 }
 
-th,td{
-border:1px solid #ddd;
-padding:8px;
-font-size:14px;
-}
-
 th{
 background:#666;
 color:white;
-}
-
-tr:nth-child(even){
-background:#f2f2f2;
 }
 
 .maplink{
@@ -63,11 +59,8 @@ font-weight:bold;
 text-decoration:none;
 }
 
-.maplink:hover{
-text-decoration:underline;
-}
-
 </style>
+
 </head>
 
 <body>
@@ -89,7 +82,7 @@ Carian Maklumat Kubur Negeri Melaka
 
 </div>
 
-<table id="tableKubur">
+<table id="tableKubur" class="display">
 
 <thead>
 <tr>
@@ -110,32 +103,38 @@ Carian Maklumat Kubur Negeri Melaka
 
 <script>
 
+let table;
+
+$(document).ready(function(){
+
+table = $('#tableKubur').DataTable({
+pageLength:10
+});
+
+});
+
 function displayData(data){
 
-let tbody=document.querySelector("#tableKubur tbody");
-
-tbody.innerHTML="";
+table.clear();
 
 data.forEach(function(r){
 
-let map=`<a class="maplink" href="${r[6]}" target="_blank">Lihat Map</a>`;
+let map='<a class="maplink" href="'+r[6]+'" target="_blank">Lihat Map</a>';
 
-let row=`
-<tr>
-<td>${r[0]}</td>
-<td>${r[1]}</td>
-<td>${r[2]}</td>
-<td>${r[3]}</td>
-<td>${r[4]}</td>
-<td>${r[5]}</td>
-<td>${map}</td>
-<td>${r[7]}</td>
-</tr>
-`;
-
-tbody.innerHTML+=row;
+table.row.add([
+r[0],
+r[1],
+r[2],
+r[3],
+r[4],
+r[5],
+map,
+r[7]
+]);
 
 });
+
+table.draw();
 
 }
 
