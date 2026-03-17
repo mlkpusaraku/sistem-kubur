@@ -70,8 +70,8 @@ tbody tr:hover{ background: #d0e1f9 !important; cursor: pointer; }
 .dataTables_wrapper .dataTables_length select { font-size: 13px !important; height: 25px !important; }
 .dataTables_wrapper .dataTables_paginate button { font-size: 12px !important; }
 
-/* Scroll panjang table */
-.dataTables_scrollBody { max-height: 600px; overflow-y: scroll; }
+/* Scroll table */
+.dataTables_scrollBody { max-height: 350px; overflow-y: scroll; }
 
 /* My Map styling */
 #mymap{
@@ -85,10 +85,10 @@ tbody tr:hover{ background: #d0e1f9 !important; cursor: pointer; }
 /* Jumlah keseluruhan kubur */
 #totalKubur{
     text-align: center;
-    font-size: 60px;
+    font-size: 28px;  /* lebih kecil */
     font-weight: bold;
     color: #0d3b66;
-    margin: 20px 0;
+    margin: 10px 0;  
 }
 </style>
 </head>
@@ -139,44 +139,38 @@ let allData = [];
 $(document).ready(function(){
     table = $('#tableKubur').DataTable({
         pageLength: 25,
-        scrollY: "500px",
+        scrollY: "350px",
         scrollCollapse: true,
         scroller: true,
         deferRender: true
     });
 });
 
-// Papar data dalam table
 function displayData(data){
-    allData = data; // simpan untuk kira total
+    allData = data; 
     table.clear();
     data.forEach(function(r){
         let map='<a class="maplink" href="#mymap">📍 Lihat Lokasi</a>';
         table.row.add([ r[0], r[1], r[2], r[3], r[4], r[5], map, r[7] ]);
     });
     table.draw();
-    updateTotal(); // update jumlah keseluruhan
+    updateTotal(); 
 }
 
-// Kira jumlah keseluruhan kubur
 function updateTotal(){
     const total = allData.length;
     document.getElementById('totalKubur').innerText = total;
 }
 
-// Search function
 function searchData(){
     let nama=document.getElementById("searchNama").value;
     let daerah=document.getElementById("searchDaerah").value;
     let url="https://script.google.com/macros/s/AKfycbyOnYdL5Z2CKCs_Rra0vAZVY9uH9hnWfevcG0TjLl958JCKXWLJOk5zON4BkHas1Wya/exec?nama="+nama+"&daerah="+daerah;
     fetch(url)
     .then(res=>res.json())
-    .then(data=>{
-        displayData(data);
-    });
+    .then(data=>{ displayData(data); });
 }
 
-// Event listener
 document.getElementById("searchNama").addEventListener("keyup",searchData);
 document.getElementById("searchDaerah").addEventListener("change",searchData);
 
