@@ -18,6 +18,7 @@ html, body{
     font-size: 13px;
 }
 
+/* HEADER */
 .header{
     background: #0d3b66;
     color: white;
@@ -26,21 +27,50 @@ html, body{
     text-align: center;
 }
 
-/* TOTAL KUBUR (KECIL & KEMAS) */
-#totalKubur{
+/* LOADING SPINNER */
+#loadingBox{
     text-align: center;
-    font-size: 15px;   /* kecilkan */
-    font-weight: bold;
-    color: #0d3b66;
-    margin: 3px 0;     /* kurangkan ruang */
+    padding: 10px 0;
 }
 
+.spinner{
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0d3b66;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    animation: spin 1s linear infinite;
+    margin: auto;
+}
+
+@keyframes spin{
+    0%{ transform: rotate(0deg); }
+    100%{ transform: rotate(360deg); }
+}
+
+#loadingText{
+    font-size: 14px;
+    color: #0d3b66;
+    margin-top: 5px;
+}
+
+/* TOTAL */
+#totalKubur{
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #0d3b66;
+    margin: 2px 0;
+}
+
+/* CHART */
 #chart_div{
     width: 95%;
-    height: 220px;
+    height: 120px;
     margin: 0 auto;
 }
 
+/* SEARCH */
 .searchbox{
     background: white;
     padding: 12px;
@@ -55,7 +85,6 @@ input, select{
     max-width: 90%;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 13px;
 }
 
 /* TABLE */
@@ -84,21 +113,16 @@ tbody tr:hover{
     background: #d0e1f9 !important;
 }
 
-/* LINK MAP */
+/* MAP LINK */
 .maplink{
     color: #0d3b66;
     font-weight: bold;
     text-decoration: none;
 }
 
-/* REMOVE SEARCH DATATABLE */
+/* REMOVE DEFAULT SEARCH */
 .dataTables_wrapper .dataTables_filter{
     display: none;
-}
-
-/* SCROLL TABLE */
-.dataTables_scrollBody{
-    max-height: 50vh;
 }
 
 /* MAP */
@@ -109,7 +133,6 @@ tbody tr:hover{
     border: 2px solid #0d3b66;
     border-radius: 6px;
 }
-
 </style>
 </head>
 
@@ -119,9 +142,16 @@ tbody tr:hover{
 Carian Maklumat Kubur Negeri Melaka
 </div>
 
-<div id="totalKubur">Loading...</div>
+<!-- LOADING -->
+<div id="loadingBox">
+    <div class="spinner"></div>
+    <div id="loadingText">Loading...</div>
+</div>
+
+<div id="totalKubur"></div>
 <div id="chart_div"></div>
 
+<!-- SEARCH -->
 <div class="searchbox">
 <input type="text" id="searchNama" placeholder="Taip Nama Si Mati">
 
@@ -133,6 +163,7 @@ Carian Maklumat Kubur Negeri Melaka
 </select>
 </div>
 
+<!-- TABLE -->
 <table id="tableKubur" class="display">
 <thead>
 <tr>
@@ -179,46 +210,38 @@ function updateChart(){
 
     let data = google.visualization.arrayToDataTable(dataArray);
 
-    let options = {
+    let chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+    chart.draw(data, {
         title: 'Jumlah Kubur Mengikut Daerah',
         colors: ['#0d3b66'],
         legend: {position:'none'}
-    };
-
-    let chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-    chart.draw(data, options);
+    });
 }
 
-/* DISPLAY DATA */
+/* DISPLAY */
 function displayData(data){
     allData = data;
     table.clear();
 
     data.forEach(function(r){
-
         let map = '';
         if(r[6]){
             let lokasi = encodeURIComponent(r[6]);
             let url = "https://www.google.com/maps?q=" + lokasi;
-
             map = '<a class="maplink" href="'+url+'" target="_blank">📍 Lihat Lokasi</a>';
         }
 
         table.row.add([
-            r[0],
-            r[1],
-            r[2],
-            r[3],
-            r[4],
-            r[5],
-            map,
-            r[7]
+            r[0], r[1], r[2], r[3], r[4], r[5], map, r[7]
         ]);
     });
 
     table.draw();
 
-    document.getElementById('totalKubur').innerText = "Jumlah Kubur: " + allData.length;
+    document.getElementById('totalKubur').innerText =
+        "Jumlah Kubur: " + allData.length;
+
+    document.getElementById('loadingBox').style.display = "none";
 
     updateChart();
 }
@@ -227,15 +250,18 @@ function displayData(data){
 $(document).ready(function(){
     table = $('#tableKubur').DataTable({
         pageLength: 25,
-        scrollY: "50vh",
-        scrollCollapse: true
+        scrollY: "50vh"
     });
+
+    searchData(); // AUTO LOAD
 });
 
 /* SEARCH */
 function searchData(){
     let nama = document.getElementById("searchNama").value;
     let daerah = document.getElementById("searchDaerah").value;
+
+    document.getElementById('loadingBox').style.display = "block";
 
     let url = "https://script.google.com/macros/s/AKfycbyOnYdL5Z2CKCs_Rra0vAZVY9uH9hnWfevcG0TjLl958JCKXWLJOk5zON4BkHas1Wya/exec?nama="+nama+"&daerah="+daerah;
 
