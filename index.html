@@ -28,7 +28,7 @@ body{
     text-align: center;
 }
 
-/* Kotak search */
+/* Kotak search & dropdown */
 .searchbox{
     background: white;
     padding: 12px;
@@ -36,10 +36,10 @@ body{
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-input{
+input, select{
     padding: 6px;
     margin: 4px;
-    width: 300px;
+    width: 200px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 13px;
@@ -50,7 +50,7 @@ table{
     border-collapse: collapse;
     width: 95%;
     margin: 20px auto;
-    background: #e6f0fa; /* biru lembut */
+    background: white;
     font-size: 12px;
 }
 
@@ -58,10 +58,22 @@ th{
     background: #0d3b66; /* biru gelap */
     color: white;
     font-size: 12px;
+    text-align: left;
+    padding: 8px;
 }
 
 td{
     font-size: 12px;
+    padding: 8px;
+}
+
+/* Baris bergilir-gilir */
+tbody tr:nth-child(odd){
+    background: #f0f0f0; /* kelabu lembut */
+}
+
+tbody tr:nth-child(even){
+    background: #ffffff;
 }
 
 /* Link lokasi */
@@ -73,9 +85,8 @@ td{
 }
 
 /* --- DataTables override --- */
-.dataTables_wrapper .dataTables_filter input {
-    font-size: 13px !important;
-    height: 25px !important;
+.dataTables_wrapper .dataTables_filter {
+    display: none; /* buang search default DataTables */
 }
 
 .dataTables_wrapper .dataTables_length select {
@@ -98,6 +109,13 @@ Carian Maklumat Kubur Negeri Melaka
 
 <div class="searchbox">
 <input type="text" id="searchNama" placeholder="Taip Nama Si Mati">
+
+<select id="searchDaerah">
+<option value="">Semua Daerah</option>
+<option>Melaka Tengah</option>
+<option>Alor Gajah</option>
+<option>Jasin</option>
+</select>
 </div>
 
 <table id="tableKubur" class="display">
@@ -155,8 +173,9 @@ function displayData(data){
 
 function searchData(){
     let nama=document.getElementById("searchNama").value;
+    let daerah=document.getElementById("searchDaerah").value;
 
-    let url="https://script.google.com/macros/s/AKfycbyOnYdL5Z2CKCs_Rra0vAZVY9uH9hnWfevcG0TjLl958JCKXWLJOk5zON4BkHas1Wya/exec?nama="+nama;
+    let url="https://script.google.com/macros/s/AKfycbyOnYdL5Z2CKCs_Rra0vAZVY9uH9hnWfevcG0TjLl958JCKXWLJOk5zON4BkHas1Wya/exec?nama="+nama+"&daerah="+daerah;
 
     fetch(url)
     .then(res=>res.json())
@@ -166,6 +185,7 @@ function searchData(){
 }
 
 document.getElementById("searchNama").addEventListener("keyup",searchData);
+document.getElementById("searchDaerah").addEventListener("change",searchData);
 
 </script>
 
