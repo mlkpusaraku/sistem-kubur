@@ -50,7 +50,7 @@ table{
     border-collapse: collapse;
     width: 95%;
     margin: 20px auto;
-    background: white;
+    background: #e6f0fa; /* biru lembut */
     font-size: 12px;
 }
 
@@ -58,22 +58,10 @@ th{
     background: #0d3b66; /* biru gelap */
     color: white;
     font-size: 12px;
-    text-align: left;
-    padding: 8px;
 }
 
 td{
     font-size: 12px;
-    padding: 8px;
-}
-
-/* Baris bergilir-gilir */
-tbody tr:nth-child(odd){
-    background: #f0f0f0; /* kelabu lembut */
-}
-
-tbody tr:nth-child(even){
-    background: #ffffff;
 }
 
 /* Link lokasi */
@@ -85,8 +73,9 @@ tbody tr:nth-child(even){
 }
 
 /* --- DataTables override --- */
-.dataTables_wrapper .dataTables_filter {
-    display: none; /* buang search default DataTables */
+.dataTables_wrapper .dataTables_filter input {
+    font-size: 13px !important;
+    height: 25px !important;
 }
 
 .dataTables_wrapper .dataTables_length select {
