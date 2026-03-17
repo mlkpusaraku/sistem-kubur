@@ -7,7 +7,7 @@
 <style>
 
 body{
-font-family: Arial;
+font-family:Arial;
 background:#f5f5f5;
 margin:0;
 }
@@ -24,12 +24,15 @@ text-align:center;
 background:white;
 padding:15px;
 text-align:center;
+box-shadow:0 2px 5px rgba(0,0,0,0.2);
 }
 
 input,select{
 padding:8px;
 margin:5px;
 width:220px;
+border:1px solid #ccc;
+border-radius:4px;
 }
 
 table{
@@ -57,10 +60,14 @@ background:#f2f2f2;
 .maplink{
 color:blue;
 font-weight:bold;
+text-decoration:none;
+}
+
+.maplink:hover{
+text-decoration:underline;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -89,7 +96,7 @@ Carian Maklumat Kubur Negeri Melaka
 <th>Nama Si Mati</th>
 <th>Nama Tapak Kubur</th>
 <th>Nombor Kubur</th>
-<th>Baris/Lajur</th>
+<th>Baris / Lajur</th>
 <th>Tarikh Kematian</th>
 <th>Umur</th>
 <th>Lokasi Kubur</th>
@@ -103,35 +110,13 @@ Carian Maklumat Kubur Negeri Melaka
 
 <script>
 
-let database=[];
-
-const sheetURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSs2iLNoW3nhQ7jxhzKAPbev6UPK99anfHiE7s6A9YP8Gg4cgVlKSq1Ycu3VDSe-PggQx26Z-QzG9V_/pubhtml?gid=2066831020&single=true&output=csv";
-
-fetch(sheetURL)
-.then(res=>res.text())
-.then(data=>{
-
-let rows=data.split("\n").slice(1);
-
-rows.forEach(r=>{
-
-let col=r.split(",");
-
-database.push(col);
-
-});
-
-displayData(database);
-
-});
-
 function displayData(data){
 
 let tbody=document.querySelector("#tableKubur tbody");
 
 tbody.innerHTML="";
 
-data.forEach(r=>{
+data.forEach(function(r){
 
 let map=`<a class="maplink" href="${r[6]}" target="_blank">Lihat Map</a>`;
 
@@ -154,26 +139,25 @@ tbody.innerHTML+=row;
 
 }
 
-document.getElementById("searchNama").addEventListener("keyup",searchData);
-document.getElementById("searchDaerah").addEventListener("change",searchData);
-
 function searchData(){
 
-let nama=document.getElementById("searchNama").value.toLowerCase();
-let daerah=document.getElementById("searchDaerah").value.toLowerCase();
+let nama=document.getElementById("searchNama").value;
+let daerah=document.getElementById("searchDaerah").value;
 
-let result=database.filter(r=>{
+let url="https://script.google.com/macros/s/AKfycbyOnYdL5Z2CKCs_Rra0vAZVY9uH9hnWfevcG0TjLl958JCKXWLJOk5zON4BkHas1Wya/exec?nama="+nama+"&daerah="+daerah;
 
-let namaMatch=r[0].toLowerCase().includes(nama);
-let daerahMatch=daerah=="" || r[7].toLowerCase()==daerah;
+fetch(url)
+.then(res=>res.json())
+.then(data=>{
 
-return namaMatch && daerahMatch;
+displayData(data);
 
 });
 
-displayData(result);
-
 }
+
+document.getElementById("searchNama").addEventListener("keyup",searchData);
+document.getElementById("searchDaerah").addEventListener("change",searchData);
 
 </script>
 
