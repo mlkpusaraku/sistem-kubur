@@ -17,6 +17,7 @@ html, body{
     margin: 0;
     font-size: 13px;
 }
+
 .header{
     background: #0d3b66;
     color: white;
@@ -24,12 +25,29 @@ html, body{
     font-size: 18px;
     text-align: center;
 }
+
+/* TOTAL KUBUR (KECIL & KEMAS) */
+#totalKubur{
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #0d3b66;
+    margin: 5px 0;
+}
+
+#chart_div{
+    width: 95%;
+    height: 220px;
+    margin: 0 auto;
+}
+
 .searchbox{
     background: white;
     padding: 12px;
     text-align: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
+
 input, select{
     padding: 6px;
     margin: 4px;
@@ -39,83 +57,74 @@ input, select{
     border-radius: 4px;
     font-size: 13px;
 }
+
+/* TABLE */
 table{
     border-collapse: collapse;
     width: 95%;
-    max-width: 95%;
     margin: 20px auto;
     background: white;
     font-size: 12px;
 }
+
 th{
     background: #0d3b66;
     color: white;
-    font-size: 12px;
-    text-align: left;
     padding: 8px;
 }
+
 td{
-    font-size: 12px;
     padding: 8px;
 }
+
 tbody tr:nth-child(odd){ background: #f0f0f0; }
 tbody tr:nth-child(even){ background: #ffffff; }
-tbody tr:hover{ background: #d0e1f9 !important; cursor: pointer; }
 
+tbody tr:hover{
+    background: #d0e1f9 !important;
+}
+
+/* LINK MAP */
 .maplink{
     color: #0d3b66;
     font-weight: bold;
     text-decoration: none;
-    font-size: 12px;
-}
-.dataTables_wrapper .dataTables_filter { display: none; }
-.dataTables_wrapper .dataTables_length select { font-size: 13px !important; height: 25px !important; }
-.dataTables_wrapper .dataTables_paginate button { font-size: 12px !important; }
-
-.dataTables_scrollBody { max-height: 50vh; overflow-y: auto; }
-
-#totalKubur{
-    text-align: center;
-    font-size: 28px;
-    font-weight: bold;
-    color: #0d3b66;
-    margin: 10px 0;  
 }
 
-#chart_div{
-    width: 95%;
-    height: 25vh;
-    max-height: 250px;
-    margin: 0 auto;
+/* REMOVE SEARCH DATATABLE */
+.dataTables_wrapper .dataTables_filter{
+    display: none;
 }
 
+/* SCROLL TABLE */
+.dataTables_scrollBody{
+    max-height: 50vh;
+}
+
+/* MAP */
 #mymap{
     width: 95%;
-    height: 50vh; /* responsive tinggi ikut screen */
-    max-height: 700px;
+    height: 500px;
     margin: 30px auto;
     border: 2px solid #0d3b66;
     border-radius: 6px;
 }
 
-/* Responsive adjustments */
-@media screen and (max-width: 768px){
-    input, select{ width: 90%; }
-    #chart_div{ height: 200px; }
-    #mymap{ height: 400px; }
-}
 </style>
 </head>
 
 <body>
 
-<div class="header">Carian Maklumat Kubur Negeri Melaka</div>
+<div class="header">
+Carian Maklumat Kubur Negeri Melaka
+</div>
 
-<div id="totalKubur">Loading…</div>
+<div id="totalKubur">Loading...</div>
 <div id="chart_div"></div>
 
 <div class="searchbox">
 <input type="text" id="searchNama" placeholder="Taip Nama Si Mati">
+
 <select id="searchDaerah">
 <option value="">Semua Daerah</option>
 <option>Melaka Tengah</option>
@@ -140,75 +149,107 @@ tbody tr:hover{ background: #d0e1f9 !important; cursor: pointer; }
 <tbody></tbody>
 </table>
 
-<h3 style="text-align:center; margin-top:40px;">Lokasi Kubur (My Map)</h3>
+<h3 style="text-align:center;">Peta Lokasi Kubur</h3>
+
 <div id="mymap">
-  <iframe src="https://www.google.com/maps/d/embed?mid=1IurUoZemVe0Y6FIBNQnCRySCcS1lDRI" 
-          width="100%" height="100%" style="border:0;"></iframe>
+<iframe src="https://www.google.com/maps/d/embed?mid=1IurUoZemVe0Y6FIBNQnCRySCcS1lDRI"
+width="100%" height="100%" style="border:0;"></iframe>
 </div>
 
-<script type="text/javascript">
+<script>
+
 google.charts.load('current', {'packages':['corechart']});
+
 let table, allData = [];
 
+/* CHART */
 function updateChart(){
     let counts = {'Melaka Tengah':0,'Alor Gajah':0,'Jasin':0};
+
     allData.forEach(r=>{
-        if(counts[r[7]]!==undefined){ counts[r[7]]+=1; }
+        if(counts[r[7]] !== undefined){
+            counts[r[7]]++;
+        }
     });
+
     let dataArray = [['Daerah','Jumlah']];
-    for(let d in counts){ dataArray.push([d, counts[d]]); }
+    for(let d in counts){
+        dataArray.push([d, counts[d]]);
+    }
+
     let data = google.visualization.arrayToDataTable(dataArray);
+
     let options = {
         title: 'Jumlah Kubur Mengikut Daerah',
         colors: ['#0d3b66'],
-        legend: {position:'none'},
-        hAxis: {title:'Daerah'},
-        vAxis: {title:'Jumlah'}
+        legend: {position:'none'}
     };
+
     let chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
     chart.draw(data, options);
 }
 
+/* DISPLAY DATA */
 function displayData(data){
     allData = data;
     table.clear();
+
     data.forEach(function(r){
-        let map='<a class="maplink" href="#mymap">📍 Lihat Lokasi</a>';
-        table.row.add([ r[0], r[1], r[2], r[3], r[4], r[5], map, r[7] ]);
+
+        let map = '';
+        if(r[6]){
+            let lokasi = encodeURIComponent(r[6]);
+            let url = "https://www.google.com/maps?q=" + lokasi;
+
+            map = '<a class="maplink" href="'+url+'" target="_blank">📍 Lihat Lokasi</a>';
+        }
+
+        table.row.add([
+            r[0],
+            r[1],
+            r[2],
+            r[3],
+            r[4],
+            r[5],
+            map,
+            r[7]
+        ]);
     });
+
     table.draw();
-    document.getElementById('totalKubur').innerText = allData.length;
+
+    document.getElementById('totalKubur').innerText = "Jumlah Kubur: " + allData.length;
+
     updateChart();
 }
 
+/* TABLE INIT */
 $(document).ready(function(){
     table = $('#tableKubur').DataTable({
         pageLength: 25,
         scrollY: "50vh",
-        scrollCollapse: true,
-        scroller: true,
-        deferRender: true
+        scrollCollapse: true
     });
 });
 
+/* SEARCH */
 function searchData(){
-    let nama=document.getElementById("searchNama").value;
-    let daerah=document.getElementById("searchDaerah").value;
-    let url="https://script.google.com/macros/s/AKfycbyOnYdL5Z2CKCs_Rra0vAZVY9uH9hnWfevcG0TjLl958JCKXWLJOk5zON4BkHas1Wya/exec?nama="+nama+"&daerah="+daerah;
+    let nama = document.getElementById("searchNama").value;
+    let daerah = document.getElementById("searchDaerah").value;
+
+    let url = "https://script.google.com/macros/s/AKfycbyOnYdL5Z2CKCs_Rra0vAZVY9uH9hnWfevcG0TjLl958JCKXWLJOk5zON4BkHas1Wya/exec?nama="+nama+"&daerah="+daerah;
+
     fetch(url)
-    .then(res=>res.json())
-    .then(data=>{
+    .then(res => res.json())
+    .then(data => {
         displayData(data);
     });
 }
 
-document.getElementById("searchNama").addEventListener("keyup",searchData);
-document.getElementById("searchDaerah").addEventListener("change",searchData);
+/* EVENT */
+document.getElementById("searchNama").addEventListener("keyup", searchData);
+document.getElementById("searchDaerah").addEventListener("change", searchData);
 
-$(document).on('click', '.maplink', function(e){
-    e.preventDefault();
-    $('html, body').animate({ scrollTop: $("#mymap").offset().top }, 800);
-});
 </script>
 
 </body>
