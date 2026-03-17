@@ -1,164 +1,55 @@
-<!DOCTYPE html>
-<html>
-<head>
-
-<meta charset="UTF-8">
-<title>Carian Maklumat Kubur Negeri Melaka</title>
-
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
-<style>
-
 body{
-font-family:Arial;
-background:#f5f5f5;
-margin:0;
+    font-family: Arial;
+    background: #f5f5f5;
+    margin: 0;
+    font-size: 13px;  /* kecilkan keseluruhan teks */
 }
 
 .header{
-background:#444;
-color:white;
-padding:15px;
-font-size:22px;
-text-align:center;
+    background: #444;
+    color: white;
+    padding: 12px;     /* kurang padding */
+    font-size: 18px;   /* kecilkan tajuk */
+    text-align: center;
 }
 
 .searchbox{
-background:white;
-padding:15px;
-text-align:center;
-box-shadow:0 2px 5px rgba(0,0,0,0.2);
+    background: white;
+    padding: 12px;     /* kurang padding */
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-input,select{
-padding:8px;
-margin:5px;
-width:220px;
-border:1px solid #ccc;
-border-radius:4px;
+input, select{
+    padding: 6px;      /* kurang saiz kotak */
+    margin: 4px;
+    width: 200px;      /* kecilkan sikit */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;   /* kecilkan teks input */
 }
 
 table{
-border-collapse:collapse;
-width:95%;
-margin:20px auto;
-background:white;
+    border-collapse: collapse;
+    width: 95%;
+    margin: 20px auto;
+    background: white;
+    font-size: 12px;   /* kecilkan teks dalam jadual */
 }
 
 th{
-background:#666;
-color:white;
+    background: #666;
+    color: white;
+    font-size: 12px;   /* kecilkan header jadual */
+}
+
+td{
+    font-size: 12px;   /* kecilkan teks dalam cell */
 }
 
 .maplink{
-color:blue;
-font-weight:bold;
-text-decoration:none;
+    color: blue;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 12px;   /* kecilkan teks link */
 }
-
-</style>
-
-</head>
-
-<body>
-
-<div class="header">
-Carian Maklumat Kubur Negeri Melaka
-</div>
-
-<div class="searchbox">
-
-<input type="text" id="searchNama" placeholder="Taip Nama Si Mati">
-
-<select id="searchDaerah">
-<option value="">Semua Daerah</option>
-<option>Melaka Tengah</option>
-<option>Alor Gajah</option>
-<option>Jasin</option>
-</select>
-
-</div>
-
-<table id="tableKubur" class="display">
-
-<thead>
-<tr>
-<th>Nama Si Mati</th>
-<th>Nama Tapak Kubur</th>
-<th>Nombor Kubur</th>
-<th>Baris / Lajur</th>
-<th>Tarikh Kematian</th>
-<th>Umur</th>
-<th>Lokasi Kubur</th>
-<th>Daerah</th>
-</tr>
-</thead>
-
-<tbody></tbody>
-
-</table>
-
-<script>
-
-let table;
-
-$(document).ready(function(){
-
-table = $('#tableKubur').DataTable({
-pageLength:10
-});
-
-});
-
-function displayData(data){
-
-table.clear();
-
-data.forEach(function(r){
-
-let map='<a class="maplink" href="'+r[6]+'" target="_blank">📍 Lihat Lokasi</a>';
-
-table.row.add([
-r[0],
-r[1],
-r[2],
-r[3],
-r[4],
-r[5],
-map,
-r[7]
-]);
-
-});
-
-table.draw();
-
-}
-
-function searchData(){
-
-let nama=document.getElementById("searchNama").value;
-let daerah=document.getElementById("searchDaerah").value;
-
-let url="https://script.google.com/macros/s/AKfycbyOnYdL5Z2CKCs_Rra0vAZVY9uH9hnWfevcG0TjLl958JCKXWLJOk5zON4BkHas1Wya/exec?nama="+nama+"&daerah="+daerah;
-
-fetch(url)
-.then(res=>res.json())
-.then(data=>{
-
-displayData(data);
-
-});
-
-}
-
-document.getElementById("searchNama").addEventListener("keyup",searchData);
-document.getElementById("searchDaerah").addEventListener("change",searchData);
-
-</script>
-
-</body>
-</html>
