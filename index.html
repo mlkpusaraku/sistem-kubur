@@ -17,7 +17,6 @@ body{
     margin:0;
     font-size:12px;
 }
-
 .header{
     background:#0d3b66;
     color:white;
@@ -26,7 +25,6 @@ body{
     font-size:16px;
     font-weight:bold;
 }
-
 #loadingBox{
     text-align:center;
     padding:8px;
@@ -43,14 +41,12 @@ body{
 @keyframes spin{
     100%{transform:rotate(360deg);}
 }
-
 .searchbox{
     background:white;
     padding:10px;
     text-align:center;
     box-shadow:0 2px 4px rgba(0,0,0,0.1);
 }
-
 input,select{
     padding:5px;
     margin:3px;
@@ -58,22 +54,18 @@ input,select{
     border:1px solid #ccc;
     border-radius:4px;
 }
-
 table{
     width:95%;
     margin:15px auto;
     font-size:11px;
 }
-
 th{
     background:#0d3b66;
     color:white;
 }
-
 tbody tr:hover{
     background:#e6f0ff !important;
 }
-
 .mapbtn{
     background:#0d3b66;
     color:white;
@@ -82,23 +74,19 @@ tbody tr:hover{
     text-decoration:none;
     font-size:11px;
 }
-
 .bottomBox{
     width:95%;
     margin:20px auto;
     text-align:center;
 }
-
 #totalKubur{
     font-size:14px;
     font-weight:bold;
     color:#0d3b66;
 }
-
 #chart_div{
     height:150px;
 }
-
 #mymap{
     width:95%;
     height:400px;
@@ -152,7 +140,6 @@ Carian Maklumat Kubur Negeri Melaka
 width="100%" height="100%" style="border:0;"></iframe>
 </div>
 
-<!-- BAWAH MAP: JUMLAH + CHART -->
 <div class="bottomBox">
 <div id="totalKubur"></div>
 <div id="chart_div"></div>
@@ -165,10 +152,10 @@ let table, allData=[];
 let debounceTimer;
 
 /* CHART */
-function updateChart(){
+function updateChart(filteredData){
 let counts={'Melaka Tengah':0,'Alor Gajah':0,'Jasin':0};
 
-allData.forEach(r=>{
+filteredData.forEach(r=>{
 if(counts[r[7]]!==undefined){counts[r[7]]++;}
 });
 
@@ -185,8 +172,8 @@ legend:'none'
 /* DISPLAY */
 function displayData(data){
 
-// buang header kalau ada
-data=data.filter(r=>r[0]!=="Nama Si Mati");
+// buang row header Form/extra jika ada
+data = data.filter(r => r[0] && r[0] !== "Nama Si Mati" && !r[0].startsWith("Taip Nama"));
 
 allData=data;
 table.clear();
@@ -207,11 +194,12 @@ table.row.add([r[0],r[1],r[2],r[3],r[4],r[5],map,r[7]]);
 table.draw();
 
 // jumlah kubur
-document.getElementById('totalKubur').innerText="Jumlah Kubur: "+allData.length;
+document.getElementById('totalKubur').innerText="Jumlah Kubur: "+data.length;
+
+// update chart ikut filtered data
+updateChart(data);
 
 document.getElementById('loadingBox').style.display="none";
-
-updateChart();
 }
 
 /* INIT */
@@ -230,7 +218,7 @@ function searchData(){
 clearTimeout(debounceTimer);
 
 debounceTimer=setTimeout(()=>{
-let nama=document.getElementById("searchNama").value;
+let nama=document.getElementById("searchNama").value.toLowerCase();
 let daerah=document.getElementById("searchDaerah").value;
 
 document.getElementById('loadingBox').style.display="block";
@@ -239,7 +227,15 @@ let url="https://script.google.com/macros/s/AKfycbyOnYdL5Z2CKCs_Rra0vAZVY9uH9hnW
 
 fetch(url)
 .then(res=>res.json())
-.then(data=>displayData(data));
+.then(data=>{
+// apply filter tambahan client-side untuk chart
+let filtered=data.filter(r=>{
+let namaOk = !nama || r[0].toLowerCase().includes(nama);
+let daerahOk = !daerah || r[7]===daerah;
+return namaOk && daerahOk;
+});
+displayData(filtered);
+});
 
 },300);
 }
