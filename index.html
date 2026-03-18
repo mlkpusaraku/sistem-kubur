@@ -29,6 +29,11 @@ tbody tr:hover { background:#e6f0ff !important; }
 #chart_div { height:150px; }
 
 #mymap { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; border-radius:6px; }
+
+/* Mula-mula sembunyikan table */
+#tableKubur_wrapper {
+    display: none;
+}
 </style>
 </head>
 <body>
@@ -107,7 +112,7 @@ function displayTable(filteredData){
 
 // INIT TABLE + LOAD DATA
 $(document).ready(function(){
-    table = $('#tableKubur').DataTable({pageLength:20, scrollY:"45vh", order:[[4,"desc"]], lengthChange:false, info:false});
+    table = $('#tableKubur').DataTable({pageLength:20, scrollY:"300px", order:[[4,"desc"]], lengthChange:false, info:false});
     fetchAllData();
 });
 
@@ -122,7 +127,6 @@ function fetchAllData(){
         allData = data
           .filter(r => r[0] && r[0]!=="Nama Si Mati" && !r[0].startsWith("Taip Nama"))
           .map(r => r.map(c => c ? c.toString().trim() : ""));
-        displayTable(allData);
         updateChartAndTotal();
         document.getElementById('loadingBox').style.display="none";
     }).catch(err=>console.error(err));
@@ -137,7 +141,18 @@ $('#searchBox').on('keyup', function(){
         let filtered = allData.filter(r=>{
             return r.some(col=> col && col.toLowerCase().includes(keyword));
         });
+
+        if(filtered.length > 0){
+            $('#tableKubur_wrapper').fadeIn(200);
+        } else {
+            $('#tableKubur_wrapper').fadeOut(200);
+        }
+
         displayTable(filtered);
+        
+        // Sesuaikan tinggi table ikut bilangan hasil
+        let newHeight = Math.min(filtered.length * 25 + 50, 400); // max 400px
+        $('.dataTables_scrollBody').css('max-height', newHeight + 'px');
     }, 300);
 });
 </script>
