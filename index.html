@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
 <meta charset="UTF-8">
 <title>Carian Maklumat Kubur Negeri Melaka</title>
@@ -18,8 +18,6 @@ body{
   background:#f4f6f8;
   margin:0;
 }
-
-/* HEADER */
 .header{
   background:#0d3b66;
   color:white;
@@ -28,8 +26,6 @@ body{
   font-size:16px;
   font-weight:bold;
 }
-
-/* SEARCH */
 .searchbox{
   display:flex;
   flex-wrap:wrap;
@@ -38,15 +34,12 @@ body{
   padding:10px;
   background:white;
 }
-
 input,select{
   padding:6px;
   border:1px solid #ccc;
   border-radius:5px;
   width:180px;
 }
-
-/* TABLE */
 #tableWrapper{
   width:95%;
   margin:10px auto;
@@ -56,21 +49,17 @@ input,select{
   border-radius:8px;
   background:white;
 }
-
 table{
   width:100%;
   font-size:12px;
 }
-
 th{
   background:#0d3b66;
   color:white;
 }
-
 td{
   padding:6px;
 }
-
 .mapbtn{
   background:#0d3b66;
   color:white;
@@ -79,53 +68,31 @@ td{
   text-decoration:none;
   font-size:11px;
 }
-
-/* BOTTOM */
 .bottomBox{
   text-align:center;
   margin-top:10px;
   padding:10px;
 }
-
 #chart_div{
   height:200px;
   width:100%;
 }
-
 #totalKubur{
   font-weight:bold;
   color:#0d3b66;
   margin-bottom:10px;
 }
-
-/* DATATABLE FIX */
 .dataTables_wrapper{
   font-size:11px;
 }
-
 #tableKubur_filter{
   display:none;
 }
-
-/* 📱 MOBILE */
 @media(max-width:600px){
-
-  .header{
-    font-size:14px;
-  }
-
-  input,select{
-    width:100%;
-  }
-
-  table{
-    font-size:11px;
-  }
-
-  .mapbtn{
-    padding:3px 6px;
-    font-size:10px;
-  }
+  .header{ font-size:14px; }
+  input,select{ width:100%; }
+  table{ font-size:11px; }
+  .mapbtn{ padding:3px 6px; font-size:10px; }
 }
 </style>
 </head>
@@ -173,8 +140,8 @@ google.charts.setOnLoadCallback(fetchData);
 
 let allData=[], table;
 
-// ✅ URL AWAK (DAH SIAP LETAK)
-let url="https://script.google.com/macros/s/AKfycbwkNLPfRlKSyqhAM8WYBQDbzDWcnxxzf6OXB2p2dMf-ArS20dmy1hDujxqYQOUbfkuU/exec";
+// ✅ URL AWAK (NEW)
+let url="https://script.google.com/macros/s/AKfycbx3EtpLWuKVI524sjcWv8_6iBLXeEylBI6zGfaBAgIQgogtSbitvJotxBmGvBrhyFfH/exec";
 
 function fetchData(){
   fetch(url)
@@ -183,7 +150,8 @@ function fetchData(){
     allData=data;
     initTable();
     updateChart();
-  });
+  })
+  .catch(err=>console.error('Ralat fetch data:',err));
 }
 
 function initTable(){
@@ -193,20 +161,17 @@ function initTable(){
     lengthChange:false,
     responsive:true
   });
-
   display(allData);
 }
 
 function display(data){
   table.clear();
-
   data.forEach(r=>{
     let map='';
     if(r[6]){
       let urlMap="https://www.google.com/maps?q="+encodeURIComponent(r[6]);
       map=`<a class="mapbtn" href="${urlMap}" target="_blank">Map</a>`;
     }
-
     table.row.add([
       r[0]||'',
       r[1]||'',
@@ -218,22 +183,18 @@ function display(data){
       r[7]||''
     ]);
   });
-
   table.draw();
 }
 
 function updateChart(){
   let counts={};
-
   allData.forEach(r=>{
     let d=r[7]||"Tiada";
     counts[d]=(counts[d]||0)+1;
   });
 
   let data=[['Daerah','Jumlah']];
-  for(let d in counts){
-    data.push([d,counts[d]]);
-  }
+  for(let d in counts) data.push([d,counts[d]]);
 
   let chart=new google.visualization.ColumnChart(document.getElementById('chart_div'));
   chart.draw(google.visualization.arrayToDataTable(data),{
@@ -245,7 +206,6 @@ function updateChart(){
   document.getElementById('totalKubur').innerText="Jumlah Kubur: "+allData.length;
 }
 
-/* SEARCH */
 function filterData(){
   let val=document.getElementById("searchNama").value.toLowerCase();
   let daerah=document.getElementById("searchDaerah").value;
@@ -260,8 +220,6 @@ function filterData(){
 
 document.getElementById("searchNama").addEventListener("keyup",filterData);
 document.getElementById("searchDaerah").addEventListener("change",filterData);
-
-/* 📱 RESPONSIVE CHART AUTO RESIZE */
 window.addEventListener('resize', updateChart);
 </script>
 
