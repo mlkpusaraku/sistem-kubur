@@ -14,28 +14,32 @@ body{font-family:Arial;background:#f4f6f8;margin:0;font-size:12px;}
 #loadingBox{text-align:center;padding:8px;}
 .spinner{border:3px solid #eee;border-top:3px solid #0d3b66;border-radius:50%;width:20px;height:20px;animation:spin 1s linear infinite;margin:auto;}
 @keyframes spin{100%{transform:rotate(360deg);}}
+
+/* SEARCH */
 .searchbox{background:white;padding:10px;text-align:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
 input,select{padding:5px;margin:3px;width:180px;border:1px solid #ccc;border-radius:4px;}
-/* Table wrap text */
-table td, table th{
-    white-space: normal;
-    word-wrap: break-word;
-    max-width:120px;
-}
-/* Table wrapper untuk scroll */
+
+/* TABLE */
 #tableWrapper{
     width:95%;
     margin:15px auto;
-    max-height:250px; /* tinggi awal table */
-    overflow-y:auto; /* scroll muncul bila banyak data */
+    max-height:250px; /* tinggi table pendek */
+    overflow-y:auto;
     border:1px solid #ccc;
     border-radius:4px;
 }
 table{width:100%;border-collapse:collapse;font-size:11px;}
+table td, table th{
+    white-space:normal;
+    word-wrap:break-word;
+    max-width:120px;
+}
 th{background:#0d3b66;color:white;padding:5px;}
 td{padding:5px;}
 tbody tr:hover{background:#e6f0ff !important;}
 .mapbtn{background:#0d3b66;color:white;padding:4px 8px;border-radius:4px;text-decoration:none;font-size:11px;}
+
+/* MAP + BOTTOM */
 .bottomBox{width:95%;margin:20px auto;text-align:center;}
 #totalKubur{font-size:14px;font-weight:bold;color:#0d3b66;}
 #chart_div{height:150px;}
@@ -93,10 +97,11 @@ tbody tr:hover{background:#e6f0ff !important;}
 
 <script>
 google.charts.load('current', {'packages':['corechart']});
+google.charts.setOnLoadCallback(fetchAllData);
 
 let table, allData=[], debounceTimer;
 
-// PAPAR CHART + JUMLAH SEMUA KUBUR
+// UPDATE CHART & TOTAL
 function updateChartAndTotal(){
   let counts={'Melaka Tengah':0,'Alor Gajah':0,'Jasin':0};
   allData.forEach(r=>{if(counts[r[7]]!==undefined){counts[r[7]]++;}});
@@ -110,7 +115,7 @@ function updateChartAndTotal(){
   document.getElementById('totalKubur').innerText="Jumlah Kubur: "+allData.length;
 }
 
-// DISPLAY TABLE ikut search
+// DISPLAY TABLE
 function displayTable(filteredData){
   table.clear();
   filteredData.forEach(r=>{
@@ -124,16 +129,15 @@ function displayTable(filteredData){
   table.draw();
 }
 
-// INIT TABLE + LOAD DATA
+// INIT TABLE
 $(document).ready(function(){
-  table=$('#tableKubur').DataTable({pageLength:20,order:[[4,"desc"]]});//scrollY buang
-  fetchAllData(); // load semua data untuk chart & total, table kosong
+  table=$('#tableKubur').DataTable({pageLength:20,order:[[4,"desc"]]});// scroll handled by wrapper
 });
 
 // FETCH DATA DARI APPS SCRIPT
 function fetchAllData(){
   document.getElementById('loadingBox').style.display="block";
-  let url="https://script.google.com/macros/s/AKfycbxYourWebAppURL/exec"; // GANTI URL awak
+  let url="https://script.google.com/macros/s/AKfycbz9j0bG4dgiCm1ruy7q-CnW2id1LHNJ32Socqsls7zU0MWXdFI6fM3KluMS8YuWrV6e/exec";
   fetch(url).then(res=>res.json()).then(data=>{
     allData=data.filter(r=>r[0] && r[0]!=="Nama Si Mati" && !r[0].startsWith("Taip Nama"));
     updateChartAndTotal();
@@ -158,7 +162,7 @@ function searchData(){
 
 document.getElementById("searchNama").addEventListener("keyup",searchData);
 document.getElementById("searchDaerah").addEventListener("change",searchData);
-
 </script>
+
 </body>
 </html>
