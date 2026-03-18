@@ -30,7 +30,7 @@ tbody tr:hover { background:#e6f0ff !important; }
 
 #mymap { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; border-radius:6px; }
 
-/* Mula-mula sembunyikan table */
+/* Table mula-mula disembunyikan */
 #tableKubur_wrapper {
     display: none;
 }
@@ -85,7 +85,7 @@ tbody tr:hover { background:#e6f0ff !important; }
 google.charts.load('current', {'packages':['corechart']});
 let table, allData = [];
 
-// UPDATE CHART & TOTAL
+// Update chart & total
 function updateChartAndTotal() {
     let counts = {'Melaka Tengah':0,'Alor Gajah':0,'Jasin':0};
     allData.forEach(r => { if(r[7] && counts[r[7]]!==undefined) counts[r[7]]++; });
@@ -96,7 +96,7 @@ function updateChartAndTotal() {
     document.getElementById('totalKubur').innerText = "Jumlah Kubur: " + allData.length;
 }
 
-// DISPLAY TABLE
+// Display table
 function displayTable(filteredData){
     table.clear();
     filteredData.forEach(r=>{
@@ -110,13 +110,19 @@ function displayTable(filteredData){
     table.draw();
 }
 
-// INIT TABLE + LOAD DATA
+// Init table + load data
 $(document).ready(function(){
-    table = $('#tableKubur').DataTable({pageLength:20, scrollY:"300px", order:[[4,"desc"]], lengthChange:false, info:false});
+    table = $('#tableKubur').DataTable({
+        pageLength:20,
+        scrollY:"300px",
+        order:[[4,"desc"]],
+        lengthChange:false,
+        info:false
+    });
     fetchAllData();
 });
 
-// FETCH DATA
+// Fetch data
 function fetchAllData(){
     document.getElementById('loadingBox').style.display = "block";
     let url = "https://script.google.com/macros/s/AKfycbzmjtNM_Ae1SIbT0NrZz7aKZaz9K_d-luUD89SFnAdit4oM0MmLSIvkEoAzN32m5eVe/exec";
@@ -132,7 +138,7 @@ function fetchAllData(){
     }).catch(err=>console.error(err));
 }
 
-// FLEXIBLE SEARCH
+// Flexible search
 let debounceTimer;
 $('#searchBox').on('keyup', function(){
     clearTimeout(debounceTimer);
@@ -143,9 +149,9 @@ $('#searchBox').on('keyup', function(){
         });
 
         if(filtered.length > 0){
-            $('#tableKubur_wrapper').fadeIn(200);
+            $('#tableKubur_wrapper').fadeIn(200); // tunjuk table
         } else {
-            $('#tableKubur_wrapper').fadeOut(200);
+            $('#tableKubur_wrapper').fadeOut(200); // sembunyi kalau tiada hasil
         }
 
         displayTable(filtered);
