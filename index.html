@@ -13,32 +13,18 @@
 body { font-family: Arial; background:#f4f6f8; margin:0; font-size:12px; }
 .header { background:#0d3b66; color:white; padding:10px; text-align:center; font-size:16px; font-weight:bold; }
 
-#loadingBox { text-align:center; padding:8px; }
-.spinner {
-    border:3px solid #eee;
-    border-top:3px solid #0d3b66;
-    border-radius:50%;
-    width:20px;
-    height:20px;
-    animation:spin 1s linear infinite;
-    margin:auto;
-}
-@keyframes spin { 100%{transform:rotate(360deg);} }
-
 .searchbox {
     background:white;
     padding:10px;
     text-align:center;
     margin:10px auto;
     width:95%;
-    box-shadow:0 2px 4px rgba(0,0,0,0.1);
 }
 .searchbox input, .searchbox select {
     padding:6px;
     font-size:12px;
     border:1px solid #ccc;
     border-radius:4px;
-    margin:2px;
 }
 
 #resultCount {
@@ -51,7 +37,6 @@ body { font-family: Arial; background:#f4f6f8; margin:0; font-size:12px; }
 
 table { width:95%; margin:10px auto; font-size:11px; }
 th { background:#0d3b66; color:white; }
-tbody tr:hover { background:#e6f0ff !important; }
 
 .mapbtn {
     background:#0d3b66;
@@ -59,37 +44,18 @@ tbody tr:hover { background:#e6f0ff !important; }
     padding:3px 6px;
     border-radius:4px;
     text-decoration:none;
-    font-size:11px;
 }
 
-.bottomBox { width:95%; margin:20px auto; text-align:center; }
-#totalKubur { font-size:14px; font-weight:bold; color:#0d3b66; }
-#chart_div { height:150px; }
-
-#mymap {
-    width:95%;
-    height:400px;
-    margin:20px auto;
-    border:2px solid #0d3b66;
-    border-radius:6px;
-}
-
-/* mesej dalam table */
 .dataTables_empty {
     text-align:center !important;
     color:#666;
-    font-size:12px;
 }
 </style>
 </head>
+
 <body>
 
 <div class="header">Carian Maklumat Kubur Negeri Melaka</div>
-
-<div id="loadingBox">
-    <div class="spinner"></div>
-    <div style="font-size:12px;color:#0d3b66;">Loading...</div>
-</div>
 
 <div class="searchbox">
     <input type="text" id="searchNama" placeholder="Cari Nama Si Mati">
@@ -101,133 +67,114 @@ tbody tr:hover { background:#e6f0ff !important; }
     </select>
 </div>
 
-<!-- JUMLAH HASIL -->
 <div id="resultCount"></div>
 
 <table id="tableKubur" class="display">
 <thead>
 <tr>
-    <th>Nama</th>
-    <th>Tapak</th>
-    <th>No</th>
-    <th>Baris</th>
-    <th>Tarikh</th>
-    <th>Umur</th>
-    <th>Map</th>
-    <th>Daerah</th>
+<th>Nama</th>
+<th>Tapak</th>
+<th>No</th>
+<th>Baris</th>
+<th>Tarikh</th>
+<th>Umur</th>
+<th>Map</th>
+<th>Daerah</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
-<h3 style="text-align:center;">Peta Lokasi Kubur</h3>
-<div id="mymap">
-<iframe src="https://www.google.com/maps/d/embed?mid=1IurUoZemVe0Y6FIBNQnCRySCcS1lDRI"
-width="100%" height="100%" style="border:0;"></iframe>
-</div>
-
-<div class="bottomBox">
-<div id="totalKubur"></div>
-<div id="chart_div"></div>
-</div>
-
 <script>
-google.charts.load('current', {'packages':['corechart']});
-
 let table, allData=[];
 
-// Chart
-function updateChartAndTotal() {
-    let counts={'Melaka Tengah':0,'Alor Gajah':0,'Jasin':0};
-    allData.forEach(r=>{ if(r[7] && counts[r[7]]!==undefined) counts[r[7]]++; });
-
-    let dataArray=[['Daerah','Jumlah']];
-    for(let d in counts) dataArray.push([d, counts[d]]);
-
-    let chart=new google.visualization.ColumnChart(document.getElementById('chart_div'));
-    chart.draw(google.visualization.arrayToDataTable(dataArray),
-        {colors:['#0d3b66'], legend:'none'});
-
-    document.getElementById('totalKubur').innerText="Jumlah Kubur: "+allData.length;
-}
-
-// Display table
-function displayTable(filteredData){
-    table.clear();
-
-    filteredData.forEach(r=>{
-        let map='';
-        if(r[6]){
-            let url=r[6].startsWith("http") ? r[6] : "https://www.google.com/maps?q="+encodeURIComponent(r[6]);
-            map=`<a class="mapbtn" href="${url}" target="_blank">Lihat</a>`;
-        }
-
-        table.row.add([r[0],r[1],r[2],r[3],r[4],r[5],map,r[7]]);
-    });
-
-    table.draw();
-
-    // Papar jumlah hasil
-    let text = "";
-    if(filteredData.length > 0){
-        text = filteredData.length + " rekod dijumpai";
-    } else if($('#searchNama').val() || $('#searchDaerah').val()){
-        text = "Tiada rekod dijumpai";
-    }
-    document.getElementById('resultCount').innerText = text;
-
-    // adjust tinggi table
-    let newHeight=Math.min(filteredData.length*25+50,400);
-    $('.dataTables_scrollBody').css('max-height',newHeight+'px');
-}
-
-// Init
+// INIT TABLE
 $(document).ready(function(){
     table = $('#tableKubur').DataTable({
         pageLength:20,
         scrollY:"150px",
         lengthChange:false,
         info:false,
-        ordering:true,
 
         language:{
             emptyTable:"Senarai akan dipaparkan sekiranya Nama Si Mati dicari"
         }
     });
 
-    fetchAllData();
+    fetchData();
 });
 
-// Fetch
-function fetchAllData(){
+// FETCH DATA
+function fetchData(){
     let url="https://script.google.com/macros/s/AKfycbzmjtNM_Ae1SIbT0NrZz7aKZaz9K_d-luUD89SFnAdit4oM0MmLSIvkEoAzN32m5eVe/exec";
 
     fetch(url)
     .then(res=>res.json())
     .then(data=>{
-        allData=data.filter(r=>r[0] && r[0]!=="Nama Si Mati")
-                   .map(r=>r.map(c=>c?c.toString().trim():""));
-
-        updateChartAndTotal();
-        document.getElementById('loadingBox').style.display="none";
+        allData = data
+            .filter(r=>r && r.length>0 && r[0] && r[0]!="Nama Si Mati")
+            .map(r=>{
+                let newRow=[];
+                for(let i=0;i<8;i++){
+                    newRow[i] = r[i] ? r[i].toString().trim() : "";
+                }
+                return newRow;
+            });
     });
 }
 
-// Search
-let debounceTimer;
-function performSearch(){
-    clearTimeout(debounceTimer);
-    debounceTimer=setTimeout(()=>{
-        let nama=$('#searchNama').val().toLowerCase();
-        let daerah=$('#searchDaerah').val();
+// DISPLAY TABLE (ANTI ERROR)
+function displayTable(filteredData){
+    table.clear();
 
-        let filtered=allData.filter(r=>{
-            let matchNama=!nama || r[0].toLowerCase().includes(nama);
-            let matchDaerah=!daerah || r[7]===daerah;
-            return matchNama && matchDaerah;
+    filteredData.forEach(r=>{
+        let map='';
+        if(r[6]){
+            let url = r[6].startsWith("http") 
+                ? r[6] 
+                : "https://www.google.com/maps?q="+encodeURIComponent(r[6]);
+            map=`<a class="mapbtn" href="${url}" target="_blank">Lihat</a>`;
+        }
+
+        table.row.add([
+            r[0], r[1], r[2], r[3],
+            r[4], r[5], map, r[7]
+        ]);
+    });
+
+    table.draw();
+
+    // RESULT COUNT
+    let text="";
+    if(filteredData.length>0){
+        text = filteredData.length+" rekod dijumpai";
+    } else if($('#searchNama').val() || $('#searchDaerah').val()){
+        text = "Tiada rekod dijumpai";
+    }
+    document.getElementById('resultCount').innerText = text;
+
+    // AUTO HEIGHT
+    let newHeight = Math.min(filteredData.length*25+50,400);
+    $('.dataTables_scrollBody').css('max-height',newHeight+'px');
+}
+
+// SEARCH
+let debounce;
+function performSearch(){
+    clearTimeout(debounce);
+    debounce=setTimeout(()=>{
+
+        let nama = $('#searchNama').val().toLowerCase();
+        let daerah = $('#searchDaerah').val();
+
+        let filtered = allData.filter(r=>{
+            let okNama = !nama || r[0].toLowerCase().includes(nama);
+            let okDaerah = !daerah || r[7]===daerah;
+            return okNama && okDaerah;
         });
 
         displayTable(filtered);
+
     },300);
 }
 
@@ -235,5 +182,6 @@ $('#searchNama').on('keyup',performSearch);
 $('#searchDaerah').on('change',performSearch);
 
 </script>
+
 </body>
 </html>
