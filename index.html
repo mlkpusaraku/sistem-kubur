@@ -30,8 +30,8 @@ tbody tr:hover { background:#e6f0ff !important; }
 
 #mymap { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; border-radius:6px; }
 
-/* Table mula-mula disembunyikan */
-#tableKubur_wrapper { display: none; }
+/* Table body mula-mula disembunyikan, header tetap nampak */
+#tableKubur tbody { display: none; }
 </style>
 </head>
 <body>
@@ -112,6 +112,12 @@ function displayTable(filteredData){
         table.row.add([r[0],r[1],r[2],r[3],r[4],r[5],map,r[7]]);
     });
     table.draw();
+    // Paparkan tbody table bila ada hasil
+    if(filteredData.length>0){
+        $('#tableKubur tbody').show();
+    } else {
+        $('#tableKubur tbody').hide();
+    }
 }
 
 // Init table + load data
@@ -141,7 +147,7 @@ function fetchAllData(){
     }).catch(err=>console.error(err));
 }
 
-// Flexible search: Nama + Daerah sahaja
+// Search: Nama + Daerah sahaja
 let debounceTimer;
 function performSearch(){
     clearTimeout(debounceTimer);
@@ -155,14 +161,9 @@ function performSearch(){
             return matchNama && matchDaerah;
         });
 
-        if(filtered.length > 0){
-            $('#tableKubur_wrapper').fadeIn(200);
-        } else {
-            $('#tableKubur_wrapper').fadeOut(200);
-        }
-
         displayTable(filtered);
 
+        // Sesuaikan tinggi table ikut bilangan hasil
         let newHeight = Math.min(filtered.length * 25 + 50, 400);
         $('.dataTables_scrollBody').css('max-height', newHeight + 'px');
     }, 300);
