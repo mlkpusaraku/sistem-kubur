@@ -17,7 +17,7 @@ body { font-family: Arial; background: #f4f6f8; margin:0; font-size:12px; }
 @keyframes spin { 100%{transform:rotate(360deg);} }
 
 .searchbox { background:white; padding:10px; text-align:center; margin:10px auto; width:95%; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
-.searchbox input { width:95%; padding:6px; font-size:12px; border:1px solid #ccc; border-radius:4px; }
+.searchbox input, .searchbox select { padding:6px; font-size:12px; border:1px solid #ccc; border-radius:4px; margin:2px; }
 
 table { width:95%; margin:15px auto; font-size:11px; }
 th { background:#0d3b66; color:white; }
@@ -31,9 +31,7 @@ tbody tr:hover { background:#e6f0ff !important; }
 #mymap { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; border-radius:6px; }
 
 /* Table mula-mula disembunyikan */
-#tableKubur_wrapper {
-    display: none;
-}
+#tableKubur_wrapper { display: none; }
 </style>
 </head>
 <body>
@@ -48,7 +46,13 @@ tbody tr:hover { background:#e6f0ff !important; }
 
 <!-- SEARCH -->
 <div class="searchbox">
-    <input type="text" id="searchBox" placeholder="Cari nama, tahun kematian, tapak, baris, dll...">
+    <input type="text" id="searchNama" placeholder="Cari Nama Si Mati">
+    <select id="searchDaerah">
+        <option value="">Semua Daerah</option>
+        <option value="Melaka Tengah">Melaka Tengah</option>
+        <option value="Alor Gajah">Alor Gajah</option>
+        <option value="Jasin">Jasin</option>
+    </select>
 </div>
 
 <!-- TABLE -->
@@ -129,7 +133,6 @@ function fetchAllData(){
     fetch(url)
     .then(res=>res.json())
     .then(data=>{
-        // Bersihkan semua kolum jadi string & trim space
         allData = data
           .filter(r => r[0] && r[0]!=="Nama Si Mati" && !r[0].startsWith("Taip Nama"))
           .map(r => r.map(c => c ? c.toString().trim() : ""));
@@ -138,29 +141,36 @@ function fetchAllData(){
     }).catch(err=>console.error(err));
 }
 
-// Flexible search
+// Flexible search: Nama + Daerah sahaja
 let debounceTimer;
-$('#searchBox').on('keyup', function(){
+function performSearch(){
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(()=>{
-        let keyword = $(this).val().toLowerCase();
+        let namaKeyword = $('#searchNama').val().toLowerCase();
+        let daerahFilter = $('#searchDaerah').val();
+
         let filtered = allData.filter(r=>{
-            return r.some(col=> col && col.toLowerCase().includes(keyword));
+            let matchNama = !namaKeyword || (r[0] && r[0].toLowerCase().includes(namaKeyword));
+            let matchDaerah = !daerahFilter || r[7]===daerahFilter;
+            return matchNama && matchDaerah;
         });
 
         if(filtered.length > 0){
-            $('#tableKubur_wrapper').fadeIn(200); // tunjuk table
+            $('#tableKubur_wrapper').fadeIn(200);
         } else {
-            $('#tableKubur_wrapper').fadeOut(200); // sembunyi kalau tiada hasil
+            $('#tableKubur_wrapper').fadeOut(200);
         }
 
         displayTable(filtered);
-        
-        // Sesuaikan tinggi table ikut bilangan hasil
-        let newHeight = Math.min(filtered.length * 25 + 50, 400); // max 400px
+
+        let newHeight = Math.min(filtered.length * 25 + 50, 400);
         $('.dataTables_scrollBody').css('max-height', newHeight + 'px');
     }, 300);
-});
+}
+
+$('#searchNama').on('keyup', performSearch);
+$('#searchDaerah').on('change', performSearch);
+
 </script>
 </body>
 </html>
