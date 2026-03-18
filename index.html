@@ -77,18 +77,26 @@ google.charts.load('current', {'packages':['corechart']});
 let table, allData=[];
 let debounceTimer;
 
-// PAPAR CHART + JUMLAH SEMUA KUBUR
+// COUNT KUBUR MENGIKUT DAERAH + TOTAL
 function updateChartAndTotal(){
-  let counts={'Melaka Tengah':0,'Alor Gajah':0,'Jasin':0};
-  allData.forEach(r=>{if(counts[r[7]]!==undefined){counts[r[7]]++;}});
-  
-  let data=[['Daerah','Jumlah']];
-  for(let d in counts){data.push([d,counts[d]]);}
-  
-  let chart=new google.visualization.ColumnChart(document.getElementById('chart_div'));
-  chart.draw(google.visualization.arrayToDataTable(data),{colors:['#0d3b66'],legend:'none'});
-  
-  document.getElementById('totalKubur').innerText="Jumlah Kubur: "+allData.length;
+    let counts={};
+    allData.forEach(r=>{
+        let daerah = r[7] ? r[7] : "Tiada";
+        if(!counts[daerah]) counts[daerah]=0;
+        counts[daerah]++;
+    });
+
+    // total semua kubur
+    let total=0;
+    for(let d in counts) total+=counts[d];
+    document.getElementById('totalKubur').innerText="Jumlah Kubur: "+total;
+
+    // Google Chart
+    let dataArray=[['Daerah','Jumlah']];
+    for(let d in counts) dataArray.push([d,counts[d]]);
+    let chartData=google.visualization.arrayToDataTable(dataArray);
+    let chart=new google.visualization.ColumnChart(document.getElementById('chart_div'));
+    chart.draw(chartData,{colors:['#0d3b66'],legend:'none'});
 }
 
 // DISPLAY TABLE ikut search
