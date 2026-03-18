@@ -31,11 +31,19 @@ tbody tr:hover { background:#e6f0ff !important; }
 
 #mymap { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; border-radius:6px; }
 
-/* Table body mula-mula disembunyikan, header tetap nampak */
+/* Table body mula-mula disembunyikan */
 #tableKubur tbody { display:none; }
 /* Hide default datatables info/paging */
 .dataTables_wrapper .dataTables_info,
 .dataTables_wrapper .dataTables_paginate { display:none; }
+
+/* Placeholder di bawah header table */
+#tablePlaceholder {
+    text-align:center;
+    font-size:12px;
+    color:#666;
+    padding:6px 0;
+}
 </style>
 </head>
 <body>
@@ -72,6 +80,7 @@ tbody tr:hover { background:#e6f0ff !important; }
 </thead>
 <tbody></tbody>
 </table>
+<div id="tablePlaceholder">Senarai akan dipaparkan sekiranya Nama Si Mati dicari</div>
 
 <h3 style="text-align:center;">Peta Lokasi Kubur</h3>
 <div id="mymap">
@@ -111,8 +120,13 @@ function displayTable(filteredData){
         table.row.add([r[0],r[1],r[2],r[3],r[4],r[5],map,r[7]]);
     });
     table.draw();
-    if(filteredData.length>0){ $('#tableKubur tbody').show(); } 
-    else { $('#tableKubur tbody').hide(); }
+    if(filteredData.length>0){
+        $('#tableKubur tbody').show();
+        $('#tablePlaceholder').hide();
+    } else {
+        $('#tableKubur tbody').hide();
+        $('#tablePlaceholder').show();
+    }
 }
 
 // Init table
