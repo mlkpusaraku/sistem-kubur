@@ -7,49 +7,24 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
 body { font-family: Arial; background:#f4f6f8; margin:0; font-size:12px; }
-.header { background:#0d3b66; color:white; padding:10px; text-align:center; font-size:16px; font-weight:bold; }
+.header { background:#0d3b66; color:white; padding:10px; text-align:center; font-size:16px; }
 
-.searchbox {
-    background:white;
-    padding:10px;
-    text-align:center;
-    margin:10px auto;
-    width:95%;
-}
-.searchbox input, .searchbox select {
-    padding:6px;
-    font-size:12px;
-    border:1px solid #ccc;
-    border-radius:4px;
-}
+.searchbox { background:white; padding:10px; text-align:center; margin:10px auto; width:95%; }
+.searchbox input, .searchbox select { padding:6px; font-size:12px; }
 
-#resultCount {
-    width:95%;
-    margin:auto;
-    font-size:12px;
-    font-weight:bold;
-    color:#0d3b66;
-}
+#resultCount { width:95%; margin:auto; font-weight:bold; color:#0d3b66; }
 
 table { width:95%; margin:10px auto; font-size:11px; }
 th { background:#0d3b66; color:white; }
 
-.mapbtn {
-    background:#0d3b66;
-    color:white;
-    padding:3px 6px;
-    border-radius:4px;
-    text-decoration:none;
-}
+.mapbtn { background:#0d3b66; color:white; padding:3px 6px; border-radius:4px; text-decoration:none; }
 
-.dataTables_empty {
-    text-align:center !important;
-    color:#666;
-}
+#map { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; }
+
+.dataTables_empty { text-align:center !important; color:#666; }
 </style>
 </head>
 
@@ -58,13 +33,13 @@ th { background:#0d3b66; color:white; }
 <div class="header">Carian Maklumat Kubur Negeri Melaka</div>
 
 <div class="searchbox">
-    <input type="text" id="searchNama" placeholder="Cari Nama Si Mati">
-    <select id="searchDaerah">
-        <option value="">Semua Daerah</option>
-        <option value="Melaka Tengah">Melaka Tengah</option>
-        <option value="Alor Gajah">Alor Gajah</option>
-        <option value="Jasin">Jasin</option>
-    </select>
+<input type="text" id="searchNama" placeholder="Cari Nama Si Mati">
+<select id="searchDaerah">
+<option value="">Semua Daerah</option>
+<option value="Melaka Tengah">Melaka Tengah</option>
+<option value="Alor Gajah">Alor Gajah</option>
+<option value="Jasin">Jasin</option>
+</select>
 </div>
 
 <div id="resultCount"></div>
@@ -85,101 +60,94 @@ th { background:#0d3b66; color:white; }
 <tbody></tbody>
 </table>
 
+<h3 style="text-align:center;">Peta Lokasi Kubur</h3>
+<!-- MAP STATIK TANPA API KEY -->
+<div id="map">
+<iframe 
+    src="https://www.google.com/maps/d/embed?mid=1IurUoZemVe0Y6FIBNQnCRySCcS1lDRI" 
+    width="100%" height="100%" style="border:0;"></iframe>
+</div>
+
 <script>
 let table, allData=[];
 
 // INIT TABLE
 $(document).ready(function(){
-    table = $('#tableKubur').DataTable({
-        pageLength:20,
-        scrollY:"150px",
-        lengthChange:false,
-        info:false,
+table = $('#tableKubur').DataTable({
+pageLength:20,
+scrollY:"150px",
+lengthChange:false,
+info:false,
+language:{ emptyTable:"Senarai akan dipaparkan sekiranya Nama Si Mati dicari" }
+});
 
-        language:{
-            emptyTable:"Senarai akan dipaparkan sekiranya Nama Si Mati dicari"
-        }
-    });
-
-    fetchData();
+fetchData();
 });
 
 // FETCH DATA
 function fetchData(){
-    let url="https://script.google.com/macros/s/AKfycbzmjtNM_Ae1SIbT0NrZz7aKZaz9K_d-luUD89SFnAdit4oM0MmLSIvkEoAzN32m5eVe/exec";
+let url="https://script.google.com/macros/s/AKfycbzmjtNM_Ae1SIbT0NrZz7aKZaz9K_d-luUD89SFnAdit4oM0MmLSIvkEoAzN32m5eVe/exec";
 
-    fetch(url)
-    .then(res=>res.json())
-    .then(data=>{
-        allData = data
-            .filter(r=>r && r.length>0 && r[0] && r[0]!="Nama Si Mati")
-            .map(r=>{
-                let newRow=[];
-                for(let i=0;i<8;i++){
-                    newRow[i] = r[i] ? r[i].toString().trim() : "";
-                }
-                return newRow;
-            });
-    });
+fetch(url)
+.then(res=>res.json())
+.then(data=>{
+allData = data
+.filter(r=>r && r[0] && r[0]!="Nama Si Mati")
+.map(r=>{
+let row=[];
+for(let i=0;i<8;i++){
+row[i]=r[i]?r[i].toString().trim():"";
+}
+return row;
+});
+});
 }
 
-// DISPLAY TABLE (ANTI ERROR)
-function displayTable(filteredData){
-    table.clear();
+// DISPLAY TABLE
+function displayTable(data){
+table.clear();
 
-    filteredData.forEach(r=>{
-        let map='';
-        if(r[6]){
-            let url = r[6].startsWith("http") 
-                ? r[6] 
-                : "https://www.google.com/maps?q="+encodeURIComponent(r[6]);
-            map=`<a class="mapbtn" href="${url}" target="_blank">Lihat</a>`;
-        }
+data.forEach(r=>{
+let mapLink='';
+if(r[6]){
+let url=r[6].startsWith("http")?r[6]:"https://www.google.com/maps?q="+r[6];
+mapLink=`<a class="mapbtn" href="${url}" target="_blank">Lihat</a>`;
+}
 
-        table.row.add([
-            r[0], r[1], r[2], r[3],
-            r[4], r[5], map, r[7]
-        ]);
-    });
+table.row.add([r[0],r[1],r[2],r[3],r[4],r[5],mapLink,r[7]]);
+});
 
-    table.draw();
+table.draw();
 
-    // RESULT COUNT
-    let text="";
-    if(filteredData.length>0){
-        text = filteredData.length+" rekod dijumpai";
-    } else if($('#searchNama').val() || $('#searchDaerah').val()){
-        text = "Tiada rekod dijumpai";
-    }
-    document.getElementById('resultCount').innerText = text;
+// result count
+let text="";
+if(data.length>0){ text=data.length+" rekod dijumpai"; }
+else if($('#searchNama').val()||$('#searchDaerah').val()){ text="Tiada rekod dijumpai"; }
 
-    // AUTO HEIGHT
-    let newHeight = Math.min(filteredData.length*25+50,400);
-    $('.dataTables_scrollBody').css('max-height',newHeight+'px');
+$('#resultCount').text(text);
 }
 
 // SEARCH
 let debounce;
-function performSearch(){
-    clearTimeout(debounce);
-    debounce=setTimeout(()=>{
+function search(){
+clearTimeout(debounce);
+debounce=setTimeout(()=>{
 
-        let nama = $('#searchNama').val().toLowerCase();
-        let daerah = $('#searchDaerah').val();
+let nama=$('#searchNama').val().toLowerCase();
+let daerah=$('#searchDaerah').val();
 
-        let filtered = allData.filter(r=>{
-            let okNama = !nama || r[0].toLowerCase().includes(nama);
-            let okDaerah = !daerah || r[7]===daerah;
-            return okNama && okDaerah;
-        });
+let filtered=allData.filter(r=>{
+return (!nama||r[0].toLowerCase().includes(nama)) &&
+(!daerah||r[7]===daerah);
+});
 
-        displayTable(filtered);
+displayTable(filtered);
 
-    },300);
+},300);
 }
 
-$('#searchNama').on('keyup',performSearch);
-$('#searchDaerah').on('change',performSearch);
+$('#searchNama').on('keyup',search);
+$('#searchDaerah').on('change',search);
 
 </script>
 
