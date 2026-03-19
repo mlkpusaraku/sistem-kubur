@@ -14,13 +14,13 @@ body { font-family: Arial; background:#f4f6f8; margin:0; font-size:12px; }
 .header { background:#0d3b66; color:white; padding:10px; text-align:center; font-size:16px; }
 .searchbox { background:white; padding:10px; text-align:center; margin:10px auto; width:95%; }
 .searchbox input, .searchbox select { padding:6px; font-size:12px; }
-#totals { width:95%; margin:auto; font-weight:bold; color:#0d3b66; margin-bottom:5px;}
 #resultCount { width:95%; margin:auto; font-weight:bold; color:#0d3b66; margin-bottom:10px;}
 table { width:95%; margin:10px auto; font-size:11px; }
 th { background:#0d3b66; color:white; }
 .mapbtn { background:#0d3b66; color:white; padding:3px 6px; border-radius:4px; text-decoration:none; }
 #map { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; }
 #chart_div { width:95%; height:150px; margin:20px auto; }
+#totalKubur { width:95%; margin:auto; font-weight:bold; color:#0d3b66; font-size:20px; text-align:center; margin-bottom:10px;}
 .dataTables_empty { text-align:center !important; color:#666; }
 </style>
 </head>
@@ -39,7 +39,6 @@ th { background:#0d3b66; color:white; }
 </select>
 </div>
 
-<div id="totals"></div>
 <div id="resultCount"></div>
 
 <table id="tableKubur" class="display">
@@ -63,6 +62,8 @@ th { background:#0d3b66; color:white; }
 <iframe src="https://www.google.com/maps/d/embed?mid=1IurUoZemVe0Y6FIBNQnCRySCcS1lDRI" 
 width="100%" height="100%" style="border:0;"></iframe>
 </div>
+
+<div id="totalKubur"></div>
 
 <h3 style="text-align:center;">Carta Jumlah Kubur Mengikut Daerah</h3>
 <div id="chart_div"></div>
@@ -100,7 +101,7 @@ row[i]=r[i]?r[i].toString().trim():"";
 }
 return row;
 });
-updateTotals();
+updateTotalKubur();
 updateChart();
 });
 }
@@ -148,10 +149,10 @@ displayTable(filtered);
 $('#searchNama').on('keyup',search);
 $('#searchDaerah').on('change',search);
 
-// TOTALS
-function updateTotals(){
+// TOTAL KUBUR
+function updateTotalKubur(){
 let total = allData.length;
-$('#totals').text("Jumlah keseluruhan kubur: "+total);
+$('#totalKubur').text("Jumlah keseluruhan kubur di Melaka: "+total);
 }
 
 // UPDATE CHART
