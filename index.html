@@ -12,21 +12,15 @@
 <style>
 body { font-family: Arial; background:#f4f6f8; margin:0; font-size:12px; }
 .header { background:#0d3b66; color:white; padding:10px; text-align:center; font-size:16px; }
-
 .searchbox { background:white; padding:10px; text-align:center; margin:10px auto; width:95%; }
 .searchbox input, .searchbox select { padding:6px; font-size:12px; }
-
-#resultCount { width:95%; margin:auto; font-weight:bold; color:#0d3b66; }
-
+#totals { width:95%; margin:auto; font-weight:bold; color:#0d3b66; margin-bottom:5px;}
+#resultCount { width:95%; margin:auto; font-weight:bold; color:#0d3b66; margin-bottom:10px;}
 table { width:95%; margin:10px auto; font-size:11px; }
 th { background:#0d3b66; color:white; }
-
 .mapbtn { background:#0d3b66; color:white; padding:3px 6px; border-radius:4px; text-decoration:none; }
-
 #map { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; }
-
-#chart_div { width:95%; height:150px; margin:10px auto; }
-
+#chart_div { width:95%; height:150px; margin:20px auto; }
 .dataTables_empty { text-align:center !important; color:#666; }
 </style>
 </head>
@@ -34,6 +28,12 @@ th { background:#0d3b66; color:white; }
 <body>
 
 <div class="header">Carian Maklumat Kubur Negeri Melaka</div>
+
+<h3 style="text-align:center;">Peta Lokasi Kubur</h3>
+<div id="map">
+<iframe src="https://www.google.com/maps/d/embed?mid=1IurUoZemVe0Y6FIBNQnCRySCcS1lDRI" 
+width="100%" height="100%" style="border:0;"></iframe>
+</div>
 
 <div class="searchbox">
 <input type="text" id="searchNama" placeholder="Cari Nama Si Mati">
@@ -45,6 +45,7 @@ th { background:#0d3b66; color:white; }
 </select>
 </div>
 
+<div id="totals"></div>
 <div id="resultCount"></div>
 
 <table id="tableKubur" class="display">
@@ -66,13 +67,6 @@ th { background:#0d3b66; color:white; }
 <h3 style="text-align:center;">Carta Jumlah Kubur Mengikut Daerah</h3>
 <div id="chart_div"></div>
 
-<h3 style="text-align:center;">Peta Lokasi Kubur</h3>
-<div id="map">
-<iframe 
-    src="https://www.google.com/maps/d/embed?mid=1IurUoZemVe0Y6FIBNQnCRySCcS1lDRI" 
-    width="100%" height="100%" style="border:0;"></iframe>
-</div>
-
 <script>
 google.charts.load('current', {'packages':['corechart']});
 let table, allData=[];
@@ -81,7 +75,7 @@ let table, allData=[];
 $(document).ready(function(){
 table = $('#tableKubur').DataTable({
 pageLength:20,
-scrollY:"150px",
+scrollY:"200px",
 lengthChange:false,
 info:false,
 language:{ emptyTable:"Senarai akan dipaparkan sekiranya Nama Si Mati dicari" }
@@ -106,6 +100,8 @@ row[i]=r[i]?r[i].toString().trim():"";
 }
 return row;
 });
+
+updateTotals();
 updateChart();
 });
 }
@@ -120,7 +116,6 @@ if(r[6]){
 let url=r[6].startsWith("http")?r[6]:"https://www.google.com/maps?q="+r[6];
 mapLink=`<a class="mapbtn" href="${url}" target="_blank">Lihat</a>`;
 }
-
 table.row.add([r[0],r[1],r[2],r[3],r[4],r[5],mapLink,r[7]]);
 });
 
@@ -130,7 +125,6 @@ table.draw();
 let text="";
 if(data.length>0){ text=data.length+" rekod dijumpai"; }
 else if($('#searchNama').val()||$('#searchDaerah').val()){ text="Tiada rekod dijumpai"; }
-
 $('#resultCount').text(text);
 
 // update chart ikut search
@@ -142,22 +136,24 @@ let debounce;
 function search(){
 clearTimeout(debounce);
 debounce=setTimeout(()=>{
-
 let nama=$('#searchNama').val().toLowerCase();
 let daerah=$('#searchDaerah').val();
-
 let filtered=allData.filter(r=>{
 return (!nama||r[0].toLowerCase().includes(nama)) &&
 (!daerah||r[7]===daerah);
 });
-
 displayTable(filtered);
-
 },300);
 }
 
 $('#searchNama').on('keyup',search);
 $('#searchDaerah').on('change',search);
+
+// TOTALS
+function updateTotals(){
+let total = allData.length;
+$('#totals').text("Jumlah keseluruhan kubur: "+total);
+}
 
 // UPDATE CHART
 function updateChart(filteredData){
@@ -174,7 +170,6 @@ for(let d in counts) chartData.push([d, counts[d]]);
 let chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
 chart.draw(google.visualization.arrayToDataTable(chartData), {colors:['#0d3b66'], legend:'none'});
 }
-
 </script>
 
 </body>
