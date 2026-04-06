@@ -5,8 +5,14 @@
 <title>Carian Maklumat Kubur Negeri Melaka</title>
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<!-- FIXED HEADER -->
+<script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
+
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
@@ -18,6 +24,10 @@ body { font-family: Arial; background:#f4f6f8; margin:0; font-size:12px; }
 table { width:95%; margin:10px auto; font-size:11px; }
 th { background:#0d3b66; color:white; }
 .mapbtn { background:#0d3b66; color:white; padding:3px 6px; border-radius:4px; text-decoration:none; }
+
+.namaKlik { color:#0d3b66; font-weight:bold; cursor:pointer; }
+.namaKlik:hover { text-decoration: underline; color:#e63946; }
+
 #map { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; }
 #chart_div { width:95%; height:150px; margin:20px auto; }
 #totalKubur { width:95%; margin:auto; font-weight:bold; color:#0d3b66; font-size:15px; text-align:center; margin-bottom:10px;}
@@ -59,7 +69,8 @@ th { background:#0d3b66; color:white; }
 
 <h3 style="text-align:center;">Peta Lokasi Kubur</h3>
 <div id="map">
-<iframe src="https://www.google.com/maps/d/embed?mid=1IurUoZemVe0Y6FIBNQnCRySCcS1lDRI" 
+<iframe id="mapFrame"
+src="https://www.google.com/maps/d/embed?mid=1IurUoZemVe0Y6FIBNQnCRySCcS1lDRI"
 width="100%" height="100%" style="border:0;"></iframe>
 </div>
 
@@ -76,7 +87,7 @@ let table, allData=[];
 $(document).ready(function(){
 table = $('#tableKubur').DataTable({
 pageLength:20,
-scrollY:"200px",
+fixedHeader:true,
 lengthChange:false,
 info:false,
 language:{ emptyTable:"Senarai akan dipaparkan sekiranya Nama Si Mati dicari" }
@@ -116,20 +127,47 @@ if(r[6]){
 let url=r[6].startsWith("http")?r[6]:"https://www.google.com/maps?q="+r[6];
 mapLink=`<a class="mapbtn" href="${url}" target="_blank">Lihat</a>`;
 }
-table.row.add([r[0],r[1],r[2],r[3],r[4],r[5],mapLink,r[7]]);
+
+table.row.add([
+`<span class="namaKlik" data-lokasi="${r[6]}">${r[0]}</span>`,
+r[1],
+r[2],
+r[3],
+r[4],
+r[5],
+mapLink,
+r[7]
+]);
 });
 
 table.draw();
 
-// result count
 let text="";
 if(data.length>0){ text=data.length+" rekod dijumpai"; }
 else if($('#searchNama').val()||$('#searchDaerah').val()){ text="Tiada rekod dijumpai"; }
 $('#resultCount').text(text);
 
-// update chart ikut search
 updateChart(data);
 }
+
+// CLICK NAMA → MAP
+$(document).on('click', '.namaKlik', function(){
+
+let lokasi = $(this).data('lokasi');
+
+if(lokasi){
+let url = lokasi.startsWith("http") 
+? lokasi 
+: "https://www.google.com/maps?q=" + lokasi;
+
+$('#mapFrame').attr('src', url);
+
+$('html, body').animate({
+scrollTop: $('#map').offset().top
+}, 500);
+}
+
+});
 
 // SEARCH
 let debounce;
@@ -149,13 +187,13 @@ displayTable(filtered);
 $('#searchNama').on('keyup',search);
 $('#searchDaerah').on('change',search);
 
-// TOTAL KUBUR
+// TOTAL
 function updateTotalKubur(){
 let total = allData.length;
 $('#totalKubur').text("Jumlah keseluruhan kubur di Melaka: "+total);
 }
 
-// UPDATE CHART
+// CHART
 function updateChart(filteredData){
 let dataToUse = filteredData || allData;
 
