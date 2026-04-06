@@ -24,10 +24,6 @@ body { font-family: Arial; background:#f4f6f8; margin:0; font-size:12px; }
 table { width:95%; margin:10px auto; font-size:11px; }
 th { background:#0d3b66; color:white; }
 .mapbtn { background:#0d3b66; color:white; padding:3px 6px; border-radius:4px; text-decoration:none; }
-
-.namaKlik { color:#0d3b66; font-weight:bold; cursor:pointer; }
-.namaKlik:hover { text-decoration: underline; color:#e63946; }
-
 #map { width:95%; height:400px; margin:20px auto; border:2px solid #0d3b66; }
 #chart_div { width:95%; height:150px; margin:20px auto; }
 #totalKubur { width:95%; margin:auto; font-weight:bold; color:#0d3b66; font-size:15px; text-align:center; margin-bottom:10px;}
@@ -129,7 +125,7 @@ mapLink=`<a class="mapbtn" href="${url}" target="_blank">Lihat</a>`;
 }
 
 table.row.add([
-`<span class="namaKlik" data-lokasi="${r[6]}">${r[0]}</span>`,
+r[0],
 r[1],
 r[2],
 r[3],
@@ -149,25 +145,6 @@ $('#resultCount').text(text);
 
 updateChart(data);
 }
-
-// CLICK NAMA → MAP
-$(document).on('click', '.namaKlik', function(){
-
-let lokasi = $(this).data('lokasi');
-
-if(lokasi){
-let url = lokasi.startsWith("http") 
-? lokasi 
-: "https://www.google.com/maps?q=" + lokasi;
-
-$('#mapFrame').attr('src', url);
-
-$('html, body').animate({
-scrollTop: $('#map').offset().top
-}, 500);
-}
-
-});
 
 // SEARCH
 let debounce;
